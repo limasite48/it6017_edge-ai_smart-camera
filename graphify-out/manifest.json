@@ -1,0 +1,104 @@
+{
+  "main.py": {
+    "mtime": 1792137136.341278,
+    "seen": 1792390289.1527288,
+    "ast_hash": "8c0311c425e0722e19cba5ad088c6bdd",
+    "semantic_hash": "8c0311c425e0722e19cba5ad088c6bdd"
+  },
+  "pyproject.toml": {
+    "mtime": 1792315414.476153,
+    "seen": 1792390289.1527288,
+    "ast_hash": "01207d45da5b4bbbe690a202d84af8b5",
+    "semantic_hash": "01207d45da5b4bbbe690a202d84af8b5"
+  },
+  "reports/model_evaluation_report.json": {
+    "mtime": 1792379786.3766563,
+    "seen": 1792390289.1527288,
+    "ast_hash": "3b063c51d4abd4049dfa06cdcd143ed4",
+    "semantic_hash": "3b063c51d4abd4049dfa06cdcd143ed4"
+  },
+  "reports/video_all_classes_evaluation_report.json": {
+    "mtime": 1792387239.1560562,
+    "seen": 1792390289.1527288,
+    "ast_hash": "86fdb046697af980cb539791d51dd826",
+    "semantic_hash": "86fdb046697af980cb539791d51dd826"
+  },
+  "reports/video_evaluation_report.json": {
+    "mtime": 1792386878.7859037,
+    "seen": 1792390289.1527288,
+    "ast_hash": "917c86e2eda299bd5243eff13fada3b7",
+    "semantic_hash": "917c86e2eda299bd5243eff13fada3b7"
+  },
+  "scripts/eval-model.py": {
+    "mtime": 1792379770.4322104,
+    "seen": 1792390289.1527288,
+    "ast_hash": "d7855428d8f74ef44b8e96775a5afe9c",
+    "semantic_hash": "d7855428d8f74ef44b8e96775a5afe9c"
+  },
+  "scripts/eval-video.py": {
+    "mtime": 1792386732.398422,
+    "seen": 1792390289.1527288,
+    "ast_hash": "f010022d2ad3996bd3887e6c87f435b2",
+    "semantic_hash": "f010022d2ad3996bd3887e6c87f435b2"
+  },
+  "scripts/prepare_models.py": {
+    "mtime": 1792315991.0074332,
+    "seen": 1792390289.1527288,
+    "ast_hash": "8f4bfa485a30d741e1e4cf4d3cbab58e",
+    "semantic_hash": "8f4bfa485a30d741e1e4cf4d3cbab58e"
+  },
+  "scripts/prepare_test_videos.py": {
+    "mtime": 1792386106.2259204,
+    "seen": 1792390289.1527288,
+    "ast_hash": "75e075ce8615da0f3742fdd9d6c10291",
+    "semantic_hash": "75e075ce8615da0f3742fdd9d6c10291"
+  },
+  "scripts/test-live-camera.py": {
+    "mtime": 1792386741.7600524,
+    "seen": 1792390289.1527288,
+    "ast_hash": "54d0c0bccf2076bdeafb656825354593",
+    "semantic_hash": "54d0c0bccf2076bdeafb656825354593"
+  },
+  "README.md": {
+    "mtime": 1792137136.3422773,
+    "seen": 1792390289.1527288,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "_antigravity/project-overview.md": {
+    "mtime": 1792144806.7206948,
+    "seen": 1792390289.1527288,
+    "ast_hash": "4077b41ae430aa914d8db1a08fa7fa18",
+    "semantic_hash": "4077b41ae430aa914d8db1a08fa7fa18"
+  },
+  "_antigravity/project-pipeline.md": {
+    "mtime": 1792387285.8418818,
+    "seen": 1792390289.1527288,
+    "ast_hash": "b983d44bc45a82ee45ff7c76e399c1c0",
+    "semantic_hash": "b983d44bc45a82ee45ff7c76e399c1c0"
+  },
+  "_antigravity/v0-0-1_handout.md": {
+    "mtime": 1792389758.096885,
+    "seen": 1792390289.1527288,
+    "ast_hash": "ea3e02cea66725b2768f728f5432c2f1",
+    "semantic_hash": "ea3e02cea66725b2768f728f5432c2f1"
+  },
+  "reports/model_evaluation_report.md": {
+    "mtime": 1792379786.3734343,
+    "seen": 1792390289.1527288,
+    "ast_hash": "e40f6215aee3ecb5110c712dbc38bac4",
+    "semantic_hash": "e40f6215aee3ecb5110c712dbc38bac4"
+  },
+  "reports/video_all_classes_evaluation_report.md": {
+    "mtime": 1792387239.1517205,
+    "seen": 1792390289.1527288,
+    "ast_hash": "2ab804c900c084799725a3f9fdcb0c62",
+    "semantic_hash": "2ab804c900c084799725a3f9fdcb0c62"
+  },
+  "reports/video_evaluation_report.md": {
+    "mtime": 1792386878.7832358,
+    "seen": 1792390289.1527288,
+    "ast_hash": "a315cceb2199f4d6dc2b4ea1cb8565f1",
+    "semantic_hash": "a315cceb2199f4d6dc2b4ea1cb8565f1"
+  }
+}

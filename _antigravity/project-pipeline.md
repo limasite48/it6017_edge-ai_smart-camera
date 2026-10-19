@@ -33,6 +33,36 @@
       * Model 6 (YOLOv8n INT8): ~17.2 FPS
     - Output snapshots directory: `reports/camera_inspection_snapshots/`
 
+1.4/ Prepared Video Evaluation & Edge Camera Benchmarking [COMPLETED]
+    - Model debugging & coordinate fixes:
+      * Fixed EfficientDet-Lite0 person class indexing (MediaPipe class 0 = person) and [0, 255] float32 input scaling.
+      * Fixed YOLOv8 box coordinate decoding (normalized [0, 1] bounds scaled directly to frame width/height).
+      * Verified positive human detection across all 6 models on real snapshot test images.
+    - Video dataset preparation: `scripts/prepare_test_videos.py`
+      * Downloaded and verified 3 standardized surveillance clips in `data/test_videos/`: `one-by-one-person-detection.mp4`, `people-detection.mp4`, `face-demographics-walking.mp4`.
+    - Batch video evaluation module: `scripts/eval-video.py`
+      * Automated evaluation across all 6 models and all video clips.
+      * Comprehensive telemetry: FPS, granular latency (pre/infer/post), human detection rate, confidence, and memory delta.
+      * Exported 18 annotated MP4 evaluation videos to `reports/video_annotated/`.
+      * Reports generated: `reports/video_evaluation_report.md` and `reports/video_evaluation_report.json`.
+    - Interactive video testing: enhanced `scripts/test-live-camera.py` with `--loop` playback and `[SPACE]` pause/resume.
+
+1.5/ Aspect-Ratio Preserving Letterbox Padding & Multi-Class Evaluation [COMPLETED]
+    - Diagnostic resolution of aspect-ratio distortion:
+      * Standardized letterbox padding (114 gray fill) across `scripts/test-live-camera.py` and `scripts/eval-video.py`.
+      * Restored anchor geometric fidelity on non-square and extreme feeds (such as 9:16 vertical 4K street footage in `object-detection-02.mp4` and horizontal 4K in `03`).
+      * Added `--stretch` flag to explicitly evaluate direct squash resizing vs letterbox padding.
+    - Full COCO-90 Decoding & Anchor Calibration:
+      * Aligned label maps for SSD MobileNetV2 and EfficientDet-Lite0 to official 90-class COCO IDs.
+      * Refined anchor aspect ratios [(1.0, 1.0), (1.414, 0.707), (0.707, 1.414)] and variance scaling for raw BiFPN heads.
+      * Implemented multi-class Non-Maximum Suppression (NMS) and `--mode {human, all}` in `eval-video.py`.
+    - Extended Dataset & Dual Benchmarking:
+      * Added 3 user-provided object detection clips (`object-detection-01.mp4`, `02`, `03`) to `scripts/prepare_test_videos.py`.
+      * Generated comprehensive evaluation reports:
+        - Human Surveillance Mode: `reports/video_evaluation_report.md`
+        - General Multi-Class Object Mode: `reports/video_all_classes_evaluation_report.md`
+      * Confirmed that Full INT8 models (SSD MobileNetV2 INT8 ~20ms / 46 FPS; EfficientDet INT8 ~18ms / 47 FPS; YOLOv8n INT8 ~10.5ms / 79 FPS) deliver 3x to 4x CPU speedups with minimal precision degradation.
+
 # Phase 2: Setting up a testbed on the Xiaomi 12S Pro smartphone
 # Phase 3: Real-world performance testing on smartphones (Latency, FPS, RAM, Power)
 # Phase 4: Accuracy Evaluation (mAP) and Testing Conversion to Embedded NPU on a Laptop

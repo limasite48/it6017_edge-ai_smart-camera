@@ -3,7 +3,7 @@
 **Course**: IT6017 - Technological Trends in Digital Transformation  
 **Project**: Research and Reverse Engineering of Edge AI Camera Systems for Human Detection and Fire Detection  
 **Phase**: 1.2 Model Zoo Verification & Target Hardware Fit Analysis  
-**Generated Date**: 2026-10-18 16:34:14  
+**Generated Date**: 2026-10-19 10:16:26  
 
 ---
 
@@ -24,12 +24,12 @@
 
 | Model Filename | Architecture | Resolution & Layout | Arithmetic Type | Size (MB) | Host Latency (ms) | Host FPS | RV1109 NPU Support | Flash ROM Fit | Overall Status |
 |:---|:---|:---:|:---:|---:|---:|---:|:---:|:---:|:---:|
-| `efficientdet_lite0_fp32.tflite` | EfficientDet-Lite0 | 320x320 (NHWC) | FP32 | 13.20 | 35.5 | 28.1 | 🔴 UNSUITED | 🔴 FAIL | 🟡 WARN |
-| `efficientdet_lite0_int8.tflite` | EfficientDet-Lite0 | 320x320 (NHWC) | FULL_INT8 | 4.39 | 18.9 | 52.8 | 🟢 FULL | 🟢 PASS | 🟢 PASS |
-| `ssd_mobilenet_v2_fp32.tflite` | SSD MobileNetV2 | 300x300 (NHWC) | FP32 | 23.24 | 98.1 | 10.2 | 🔴 UNSUITED | 🔴 FAIL | 🟡 WARN |
-| `ssd_mobilenet_v2_int8.tflite` | SSD MobileNetV2 | 300x300 (NHWC) | FULL_INT8 | 5.93 | 21.6 | 46.2 | 🟢 FULL | 🟢 PASS | 🟢 PASS |
-| `yolov8n_320_fp32.tflite` | YOLOv8n - Nano | 320x320 (NCHW) | FP32 | 12.17 | 38.3 | 26.1 | 🔴 UNSUITED | 🔴 FAIL | 🟡 WARN |
-| `yolov8n_320_int8.tflite` | YOLOv8n - Nano | 320x320 (NCHW) | WEIGHT_INT8 | 3.31 | 10.7 | 93.5 | 🟡 PARTIAL | 🟢 PASS | 🟢 PASS |
+| `efficientdet_lite0_fp32.tflite` | EfficientDet-Lite0 | 320x320 (NHWC) | FP32 | 13.20 | 33.0 | 30.3 | 🔴 UNSUITED | 🔴 FAIL | 🟡 WARN |
+| `efficientdet_lite0_int8.tflite` | EfficientDet-Lite0 | 320x320 (NHWC) | FULL_INT8 | 4.39 | 17.6 | 56.7 | 🟢 FULL | 🟢 PASS | 🟢 PASS |
+| `ssd_mobilenet_v2_fp32.tflite` | SSD MobileNetV2 | 300x300 (NHWC) | FP32 | 23.24 | 91.1 | 11.0 | 🔴 UNSUITED | 🔴 FAIL | 🟡 WARN |
+| `ssd_mobilenet_v2_int8.tflite` | SSD MobileNetV2 | 300x300 (NHWC) | FULL_INT8 | 5.93 | 19.8 | 50.4 | 🟢 FULL | 🟢 PASS | 🟢 PASS |
+| `yolov8n_320_fp32.tflite` | YOLOv8n - Nano | 320x320 (NCHW) | FP32 | 12.17 | 35.5 | 28.1 | 🔴 UNSUITED | 🔴 FAIL | 🟡 WARN |
+| `yolov8n_320_int8.tflite` | YOLOv8n - Nano | 320x320 (NCHW) | WEIGHT_INT8 | 3.31 | 9.9 | 101.2 | 🟡 PARTIAL | 🟢 PASS | 🟢 PASS |
 
 ---
 

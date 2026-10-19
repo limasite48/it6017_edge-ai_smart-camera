@@ -1,27 +1,72 @@
-# Python
+# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
 
-# Virtual Environment
+# Virtual Environments
 .venv/
 venv/
 ENV/
 env/
+ENV*/
 
-# Model Checkpoints & Legacy Archive
+# Scratch, Temporary & Cache Dirs
+scratch/
+tmp/
+temp/
+.cache/
+*.tmp
+
+# Datasets & Heavy Media Files
+# (Prevent pushing files exceeding GitHub 100MB limit, e.g., 4K test clips)
+data/**/*.mp4
+data/**/*.avi
+data/**/*.mov
+data/**/*.mkv
+data/**/*.tar.gz
+data/**/*.zip
+!data/**/.gitkeep
+
+# Evaluation Snapshots & Exported Video Dumps
+reports/camera_inspection_snapshots/*
+!reports/camera_inspection_snapshots/.gitkeep
+reports/video_annotated/*
+!reports/video_annotated/.gitkeep
+*.avi
+*.mkv
+
+# Temporary Model Checkpoints & Raw Framework Weights
 models_legacy/
 *.pt
+*.pth
+*.onnx
+*.engine
+*.weights
+*.pb
 
-# IDE
+# IDEs & Editors
 .vscode/
 .idea/
+*.sublime-project
+*.sublime-workspace
 
-# OS
+# OS Generated Files
 .DS_Store
 Thumbs.db
+desktop.ini
 
-# Evaluation Reports (optional: user can commit or ignore, let's keep tracked or ignore temporary run logs)
-# reports/
+# Android / Mobile Build Artifacts (for Phase 2 smartphone deployment)
+.gradle/
+build/
+app/build/
+*.apk
+*.aab
+*.ap_
+*.dex
+
+# Graphify Internal Working Caches (keep final reports, ignore runtime sidecars)
+graphify-out/.graphify_*
+graphify-out/.needs_update
+graphify-out/cache/

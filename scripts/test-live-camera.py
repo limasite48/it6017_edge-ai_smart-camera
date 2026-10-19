@@ -94,6 +94,18 @@ COCO_CLASSES_80 = [
     "hair drier", "toothbrush"
 ]
 
+COCO_CLASSES_90 = [
+    "person", "bicycle", "car", "motorcycle", "airplane", "bus", "train", "truck", "boat", "traffic light",
+    "fire hydrant", "???", "stop sign", "parking meter", "bench", "bird", "cat", "dog", "horse", "sheep",
+    "cow", "elephant", "bear", "zebra", "giraffe", "???", "backpack", "umbrella", "???", "???",
+    "handbag", "tie", "suitcase", "frisbee", "skis", "snowboard", "sports ball", "kite", "baseball bat", "baseball glove",
+    "skateboard", "surfboard", "tennis racket", "bottle", "???", "wine glass", "cup", "fork", "knife", "spoon",
+    "bowl", "banana", "apple", "sandwich", "orange", "broccoli", "carrot", "hot dog", "pizza", "donut",
+    "cake", "chair", "couch", "potted plant", "bed", "???", "dining table", "???", "???", "toilet",
+    "???", "tv", "laptop", "mouse", "remote", "keyboard", "cell phone", "microwave", "oven", "toaster",
+    "sink", "refrigerator", "???", "book", "clock", "vase", "scissors", "teddy bear", "hair drier", "toothbrush"
+]
+
 
 @dataclass
 class Detection:
@@ -103,6 +115,74 @@ class Detection:
     confidence: float
 
 
+def letterbox_image(
+    image: np.ndarray, target_size: Tuple[int, int], fill_val: int = 114
+) -> Tuple[np.ndarray, float, Tuple[int, int]]:
+    """Resize image with aspect-ratio preserving letterbox padding.
+
+    Returns:
+        padded_img: image of shape (target_h, target_w, 3)
+        scale_ratio: scale factor r
+        (dw, dh): left/top padding offset in target coordinates
+    """
+    orig_h, orig_w = image.shape[:2]
+    target_w, target_h = target_size
+
+    r = min(target_w / float(orig_w), target_h / float(orig_h))
+    new_w = int(round(orig_w * r))
+    new_h = int(round(orig_h * r))
+
+    dw = (target_w - new_w) / 2.0
+    dh = (target_h - new_h) / 2.0
+
+    top, bottom = int(round(dh - 0.1)), int(round(dh + 0.1))
+    left, right = int(round(dw - 0.1)), int(round(dw + 0.1))
+
+    if (orig_w, orig_h) != (new_w, new_h):
+        resized = cv2.resize(image, (new_w, new_h), interpolation=cv2.INTER_LINEAR)
+    else:
+        resized = image
+
+    padded = cv2.copyMakeBorder(
+        resized, top, bottom, left, right, cv2.BORDER_CONSTANT, value=(fill_val, fill_val, fill_val)
+    )
+    return padded, r, (int(round(dw)), int(round(dh)))
+
+
+def unpad_box(
+    x1_tgt: float,
+    y1_tgt: float,
+    x2_tgt: float,
+    y2_tgt: float,
+    scale_info: Tuple[float, int, int, bool],
+    orig_w: int,
+    orig_h: int,
+    target_w: int,
+    target_h: int,
+) -> Tuple[int, int, int, int]:
+    """Unpad bounding box from target tensor space back to native image coordinates."""
+    r, dw, dh, is_stretched = scale_info
+    if is_stretched:
+        scale_x = orig_w / float(target_w)
+        scale_y = orig_h / float(target_h)
+        x1 = int(round(x1_tgt * scale_x))
+        y1 = int(round(y1_tgt * scale_y))
+        x2 = int(round(x2_tgt * scale_x))
+        y2 = int(round(y2_tgt * scale_y))
+    else:
+        x1 = int(round((x1_tgt - dw) / r))
+        y1 = int(round((y1_tgt - dh) / r))
+        x2 = int(round((x2_tgt - dw) / r))
+        y2 = int(round((y2_tgt - dh) / r))
+
+    return (
+        max(0, min(orig_w, x1)),
+        max(0, min(orig_h, y1)),
+        max(0, min(orig_w, x2)),
+        max(0, min(orig_h, y2)),
+    )
+
+
 class EfficientDetAnchorGenerator:
     """Pre-generates EfficientDet-Lite0 19,206 anchors for 320x320 inputs."""
 
@@ -110,7 +190,7 @@ class EfficientDetAnchorGenerator:
         self.image_size = image_size
         self.strides = [8, 16, 32, 64, 128]
         self.scales = [2 ** 0, 2 ** (1.0 / 3.0), 2 ** (2.0 / 3.0)]
-        self.aspect_ratios = [(1.0, 1.0), (1.4, 0.7), (0.7, 1.4)]
+        self.aspect_ratios = [(1.0, 1.0), (1.414, 0.707), (0.707, 1.414)]
         self.anchors = self._generate_anchors()
 
     def _generate_anchors(self) -> np.ndarray:
@@ -141,6 +221,8 @@ class LiveCameraInspector:
         initial_key: str = "2",
         confidence_thresh: float = 0.45,
         iou_thresh: float = 0.45,
+        loop: bool = True,
+        stretch: bool = False,
     ):
         self.models_dir = models_dir
         self.snapshots_dir = snapshots_dir
@@ -149,6 +231,9 @@ class LiveCameraInspector:
         self.conf_thresh = confidence_thresh
         self.iou_thresh = iou_thresh
         self.human_only = True
+        self.loop = loop
+        self.stretch = stretch
+        self.paused = False
 
         self.loaded_interpreters: Dict[str, Interpreter] = {}
         self.current_interpreter: Optional[Interpreter] = None
@@ -182,39 +267,55 @@ class LiveCameraInspector:
             console.print(f"[bold red]Failed to load Model [{key}]: {e}[/bold red]")
             return False
 
-    def preprocess_frame(self, frame: np.ndarray, spec: Dict[str, Any]) -> Tuple[np.ndarray, float, Tuple[int, int]]:
+    def preprocess_frame(
+        self, frame: np.ndarray, spec: Dict[str, Any]
+    ) -> Tuple[np.ndarray, Tuple[int, int], Tuple[float, int, int, bool]]:
         """Preprocess camera frame to match model input shape, layout, and dtype."""
         orig_h, orig_w = frame.shape[:2]
         target_h, target_w = spec["input_resolution"]
 
-        # Convert BGR to RGB
-        rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        resized = cv2.resize(rgb, (target_w, target_h), interpolation=cv2.INTER_LINEAR)
-
-        # Handle NCHW vs NHWC
-        if spec["layout"] == "NCHW":
-            img_data = np.transpose(resized, (2, 0, 1))
+        # 1. Letterbox or Direct Stretch
+        if not self.stretch:
+            padded, r, (dw, dh) = letterbox_image(frame, (target_w, target_h))
+            rgb = cv2.cvtColor(padded, cv2.COLOR_BGR2RGB)
+            scale_info = (r, dw, dh, False)
         else:
-            img_data = resized
+            rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            resized = cv2.resize(rgb, (target_w, target_h), interpolation=cv2.INTER_LINEAR)
+            rgb = resized
+            scale_info = (1.0, 0, 0, True)
+
+        # 2. Handle NCHW vs NHWC
+        if spec["layout"] == "NCHW":
+            img_data = np.transpose(rgb, (2, 0, 1))
+        else:
+            img_data = rgb
 
         img_data = np.expand_dims(img_data, axis=0)
 
-        # Handle dtype scaling
+        # 3. Handle dtype scaling
         if spec["input_dtype"] == "uint8":
             tensor_data = img_data.astype(np.uint8)
         else:
             if spec["architecture"] == "ssd_mobilenet":
                 tensor_data = (img_data.astype(np.float32) / 127.5) - 1.0
+            elif spec["architecture"] == "efficientdet":
+                tensor_data = img_data.astype(np.float32)
             else:
                 tensor_data = img_data.astype(np.float32) / 255.0
 
-        return tensor_data, orig_h, (orig_w, orig_h)
+        return tensor_data, (orig_w, orig_h), scale_info
 
     def decode_detections(
-        self, spec: Dict[str, Any], interpreter: Interpreter, orig_size: Tuple[int, int]
+        self,
+        spec: Dict[str, Any],
+        interpreter: Interpreter,
+        orig_size: Tuple[int, int],
+        scale_info: Tuple[float, int, int, bool],
     ) -> List[Detection]:
         """Decode bounding boxes and scores from the active model output."""
         orig_w, orig_h = orig_size
+        target_w, target_h = spec["input_resolution"]
         arch = spec["architecture"]
         detections: List[Detection] = []
 
@@ -241,21 +342,19 @@ class LiveCameraInspector:
                     continue
 
                 ymin, xmin, ymax, xmax = boxes[i]
-                x1 = int(max(0, xmin * orig_w))
-                y1 = int(max(0, ymin * orig_h))
-                x2 = int(min(orig_w, xmax * orig_w))
-                y2 = int(min(orig_h, ymax * orig_h))
+                x1_t = xmin * target_w
+                y1_t = ymin * target_h
+                x2_t = xmax * target_w
+                y2_t = ymax * target_h
 
-                name = "person" if is_person else (COCO_CLASSES_80[cls_id] if cls_id < len(COCO_CLASSES_80) else f"class_{cls_id}")
-                detections.append(Detection(box=(x1, y1, x2, y2), class_id=cls_id, class_name=name, confidence=score))
+                box = unpad_box(x1_t, y1_t, x2_t, y2_t, scale_info, orig_w, orig_h, target_w, target_h)
+                name = "person" if is_person else (COCO_CLASSES_90[cls_id] if cls_id < len(COCO_CLASSES_90) and COCO_CLASSES_90[cls_id] != "???" else f"class_{cls_id}")
+                detections.append(Detection(box=box, class_id=cls_id, class_name=name, confidence=score))
 
         elif arch == "yolov8":
             out_details = interpreter.get_output_details()
             # Output: [1, 84, 2100] -> rows 0-3: [cx, cy, w, h] in 320 grid; row 4: person score
             output = interpreter.get_tensor(out_details[0]["index"])[0]  # shape: (84, 2100)
-            target_w, target_h = spec["input_resolution"]
-            scale_x = orig_w / float(target_w)
-            scale_y = orig_h / float(target_h)
 
             if self.human_only:
                 person_scores = output[4, :]
@@ -268,20 +367,19 @@ class LiveCameraInspector:
                     for idx in valid_indices:
                         cx, cy, w, h = output[:4, idx]
                         score = float(person_scores[idx])
-                        x1 = int((cx - w / 2.0) * scale_x)
-                        y1 = int((cy - h / 2.0) * scale_y)
-                        bw = int(w * scale_x)
-                        bh = int(h * scale_y)
-                        cand_boxes.append([x1, y1, bw, bh])
+                        x1_t = (cx - w / 2.0) * target_w
+                        y1_t = (cy - h / 2.0) * target_h
+                        bw_t = w * target_w
+                        bh_t = h * target_h
+                        cand_boxes.append([x1_t, y1_t, bw_t, bh_t])
                         cand_scores.append(score)
 
                     indices = cv2.dnn.NMSBoxes(cand_boxes, cand_scores, self.conf_thresh, self.iou_thresh)
                     if len(indices) > 0:
                         for i in indices.flatten():
-                            x1, y1, bw, bh = cand_boxes[i]
-                            x2 = min(orig_w, x1 + bw)
-                            y2 = min(orig_h, y1 + bh)
-                            detections.append(Detection(box=(max(0, x1), max(0, y1), x2, y2), class_id=0, class_name="person", confidence=cand_scores[i]))
+                            x1_t, y1_t, bw_t, bh_t = cand_boxes[i]
+                            box = unpad_box(x1_t, y1_t, x1_t + bw_t, y1_t + bh_t, scale_info, orig_w, orig_h, target_w, target_h)
+                            detections.append(Detection(box=box, class_id=0, class_name="person", confidence=cand_scores[i]))
             else:
                 # All classes mode for YOLOv8
                 scores_all = output[4:, :]  # (80, 2100)
@@ -298,21 +396,22 @@ class LiveCameraInspector:
                         cx, cy, w, h = output[:4, idx]
                         score = float(confidences[idx])
                         cls_id = int(class_ids[idx])
-                        x1 = int((cx - w / 2.0) * scale_x)
-                        y1 = int((cy - h / 2.0) * scale_y)
-                        bw = int(w * scale_x)
-                        bh = int(h * scale_y)
-                        cand_boxes.append([x1, y1, bw, bh])
+                        x1_t = (cx - w / 2.0) * target_w
+                        y1_t = (cy - h / 2.0) * target_h
+                        bw_t = w * target_w
+                        bh_t = h * target_h
+                        cand_boxes.append([x1_t, y1_t, bw_t, bh_t])
                         cand_scores.append(score)
                         cand_classes.append(cls_id)
 
                     indices = cv2.dnn.NMSBoxes(cand_boxes, cand_scores, self.conf_thresh, self.iou_thresh)
                     if len(indices) > 0:
                         for i in indices.flatten():
-                            x1, y1, bw, bh = cand_boxes[i]
+                            x1_t, y1_t, bw_t, bh_t = cand_boxes[i]
                             cls_id = cand_classes[i]
+                            box = unpad_box(x1_t, y1_t, x1_t + bw_t, y1_t + bh_t, scale_info, orig_w, orig_h, target_w, target_h)
                             name = COCO_CLASSES_80[cls_id] if cls_id < len(COCO_CLASSES_80) else f"class_{cls_id}"
-                            detections.append(Detection(box=(max(0, x1), max(0, y1), min(orig_w, x1 + bw), min(orig_h, y1 + bh)), class_id=cls_id, class_name=name, confidence=cand_scores[i]))
+                            detections.append(Detection(box=box, class_id=cls_id, class_name=name, confidence=cand_scores[i]))
 
         elif arch == "efficientdet":
             out_details = interpreter.get_output_details()
@@ -322,38 +421,69 @@ class LiveCameraInspector:
             scores = interpreter.get_tensor(out_details[0]["index"])[0] if out_details[0]["shape"][-1] in (90, 91) else interpreter.get_tensor(out_details[1]["index"])[0]
             deltas = interpreter.get_tensor(out_details[1]["index"])[0] if out_details[0]["shape"][-1] in (90, 91) else interpreter.get_tensor(out_details[0]["index"])[0]
 
-            target_w, target_h = spec["input_resolution"]
-            scale_x = orig_w / float(target_w)
-            scale_y = orig_h / float(target_h)
+            if self.human_only:
+                # In MediaPipe EfficientDet-Lite0 (90 classes), class 0 is Person
+                p_scores = scores[:, 0]
+                mask = p_scores >= self.conf_thresh
+                valid_indices = np.where(mask)[0]
 
-            # Person class index 0 or 1
-            p_scores = scores[:, 1] if scores.shape[1] > 1 else scores[:, 0]
-            mask = p_scores >= self.conf_thresh
-            valid_indices = np.where(mask)[0]
+                if len(valid_indices) > 0:
+                    cand_boxes = []
+                    cand_scores = []
+                    for idx in valid_indices:
+                        dy, dx, dh, dw = deltas[idx]
+                        anchor_cy, anchor_cx, anchor_h, anchor_w = self.ed_anchors[idx]
+                        cy = dy * anchor_h + anchor_cy
+                        cx = dx * anchor_w + anchor_cx
+                        h = np.exp(min(dh, 5.0)) * anchor_h
+                        w = np.exp(min(dw, 5.0)) * anchor_w
+                        x1_t = cx - w / 2.0
+                        y1_t = cy - h / 2.0
+                        cand_boxes.append([x1_t, y1_t, w, h])
+                        cand_scores.append(float(p_scores[idx]))
 
-            if len(valid_indices) > 0:
-                cand_boxes = []
-                cand_scores = []
-                for idx in valid_indices:
-                    dy, dx, dh, dw = deltas[idx]
-                    anchor_cy, anchor_cx, anchor_h, anchor_w = self.ed_anchors[idx]
-                    cy = dy * anchor_h + anchor_cy
-                    cx = dx * anchor_w + anchor_cx
-                    h = np.exp(min(dh, 5.0)) * anchor_h
-                    w = np.exp(min(dw, 5.0)) * anchor_w
+                    indices = cv2.dnn.NMSBoxes(cand_boxes, cand_scores, self.conf_thresh, self.iou_thresh)
+                    if len(indices) > 0:
+                        for i in indices.flatten():
+                            x1_t, y1_t, bw_t, bh_t = cand_boxes[i]
+                            box = unpad_box(x1_t, y1_t, x1_t + bw_t, y1_t + bh_t, scale_info, orig_w, orig_h, target_w, target_h)
+                            detections.append(Detection(box=box, class_id=0, class_name="person", confidence=cand_scores[i]))
+            else:
+                max_scores = np.max(scores, axis=1)
+                max_classes = np.argmax(scores, axis=1)
+                mask = max_scores >= self.conf_thresh
+                valid_indices = np.where(mask)[0]
 
-                    x1 = int((cx - w / 2.0) * scale_x)
-                    y1 = int((cy - h / 2.0) * scale_y)
-                    bw = int(w * scale_x)
-                    bh = int(h * scale_y)
-                    cand_boxes.append([x1, y1, bw, bh])
-                    cand_scores.append(float(p_scores[idx]))
+                if len(valid_indices) > 0:
+                    cand_boxes = []
+                    cand_scores = []
+                    cand_classes = []
+                    for idx in valid_indices:
+                        cls_id = int(max_classes[idx])
+                        name = COCO_CLASSES_90[cls_id] if cls_id < len(COCO_CLASSES_90) else f"class_{cls_id}"
+                        if name == "???":
+                            continue
 
-                indices = cv2.dnn.NMSBoxes(cand_boxes, cand_scores, self.conf_thresh, self.iou_thresh)
-                if len(indices) > 0:
-                    for i in indices.flatten():
-                        x1, y1, bw, bh = cand_boxes[i]
-                        detections.append(Detection(box=(max(0, x1), max(0, y1), min(orig_w, x1 + bw), min(orig_h, y1 + bh)), class_id=0, class_name="person", confidence=cand_scores[i]))
+                        dy, dx, dh, dw = deltas[idx]
+                        anchor_cy, anchor_cx, anchor_h, anchor_w = self.ed_anchors[idx]
+                        cy = dy * anchor_h + anchor_cy
+                        cx = dx * anchor_w + anchor_cx
+                        h = np.exp(min(dh, 5.0)) * anchor_h
+                        w = np.exp(min(dw, 5.0)) * anchor_w
+                        x1_t = cx - w / 2.0
+                        y1_t = cy - h / 2.0
+                        cand_boxes.append([x1_t, y1_t, w, h])
+                        cand_scores.append(float(max_scores[idx]))
+                        cand_classes.append(cls_id)
+
+                    indices = cv2.dnn.NMSBoxes(cand_boxes, cand_scores, self.conf_thresh, self.iou_thresh)
+                    if len(indices) > 0:
+                        for i in indices.flatten():
+                            x1_t, y1_t, bw_t, bh_t = cand_boxes[i]
+                            cls_id = cand_classes[i]
+                            name = COCO_CLASSES_90[cls_id] if cls_id < len(COCO_CLASSES_90) else f"class_{cls_id}"
+                            box = unpad_box(x1_t, y1_t, x1_t + bw_t, y1_t + bh_t, scale_info, orig_w, orig_h, target_w, target_h)
+                            detections.append(Detection(box=box, class_id=cls_id, class_name=name, confidence=cand_scores[i]))
 
         return detections
 
@@ -399,9 +529,9 @@ class LiveCameraInspector:
 
         # 3. Draw Telemetry Dashboard Overlay (Bottom Left)
         hud_bg_w = 420
-        hud_bg_h = 100
+        hud_bg_h = 120
         hud_x = 10
-        hud_y = h - hud_bg_h - 10
+        hud_y = h - hud_bg_h - 15
 
         # Semi-transparent HUD background
         overlay = frame.copy()
@@ -422,7 +552,7 @@ class LiveCameraInspector:
 
         # 4. Controls Quick Help (Bottom Right)
         help_str = "Keys [1-6]: Switch Model | [S]: Save Snapshot | [T]: Toggle Mode | [+/-]: Thresh | [Q]: Quit"
-        cv2.putText(frame, help_str, (10, h - 8), cv2.FONT_HERSHEY_SIMPLEX, 0.38, (200, 200, 200), 1, cv2.LINE_AA)
+        cv2.putText(frame, help_str, (hud_x + 10, h-20), cv2.FONT_HERSHEY_SIMPLEX, 0.38, (200, 200, 200), 1, cv2.LINE_AA)
 
         return frame
 
@@ -454,20 +584,30 @@ class LiveCameraInspector:
             )
         )
 
+        is_video_file = not str(self.source).isdigit()
         prev_time = time.perf_counter()
         fps = 0.0
         frame_count = 0
         start_time = time.perf_counter()
         snapshot_count = 0
+        current_frame: Optional[np.ndarray] = None
 
         try:
             while True:
-                ret, frame = cap.read()
-                if not ret:
-                    console.print("[yellow]End of video feed or frame grab failed.[/yellow]")
-                    break
+                if not self.paused or current_frame is None:
+                    ret, frame = cap.read()
+                    if not ret:
+                        if is_video_file and self.loop:
+                            cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+                            ret, frame = cap.read()
+                        if not ret:
+                            console.print("[yellow]End of video feed or frame grab failed.[/yellow]")
+                            break
+                    current_frame = frame
+                    frame_count += 1
+                else:
+                    frame = current_frame
 
-                frame_count += 1
                 now = time.perf_counter()
                 fps = 0.9 * fps + 0.1 * (1.0 / max(1e-5, now - prev_time))
                 prev_time = now
@@ -477,7 +617,7 @@ class LiveCameraInspector:
 
                 # Stage 1: Pre-processing
                 t0 = time.perf_counter()
-                input_tensor, orig_h, orig_size = self.preprocess_frame(frame, spec)
+                input_tensor, orig_size, scale_info = self.preprocess_frame(frame, spec)
                 t1 = time.perf_counter()
 
                 # Stage 2: Inference
@@ -487,7 +627,7 @@ class LiveCameraInspector:
                 t2 = time.perf_counter()
 
                 # Stage 3: Post-processing
-                detections = self.decode_detections(spec, interp, orig_size)
+                detections = self.decode_detections(spec, interp, orig_size, scale_info)
                 t3 = time.perf_counter()
 
                 latency_breakdown = ((t1 - t0) * 1000.0, (t2 - t1) * 1000.0, (t3 - t2) * 1000.0)
@@ -495,12 +635,21 @@ class LiveCameraInspector:
                 # Stage 4: Render Overlay
                 annotated = self.render_overlay(frame.copy(), detections, fps, latency_breakdown)
 
+                if self.paused:
+                    # Draw PAUSED overlay badge
+                    h_a, w_a = annotated.shape[:2]
+                    cv2.rectangle(annotated, (w_a // 2 - 140, 50), (w_a // 2 + 140, 95), (0, 0, 0), -1)
+                    cv2.putText(annotated, "[PAUSED] Press SPACE", (w_a // 2 - 125, 82), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2, cv2.LINE_AA)
+
                 if not no_gui:
                     cv2.imshow(window_name, annotated)
-                    key = cv2.waitKey(1) & 0xFF
+                    key = cv2.waitKey(30 if self.paused else 1) & 0xFF
 
                     if key in [ord("q"), ord("Q"), 27]:  # Quit
                         break
+                    elif key == ord(" "):  # Toggle pause
+                        self.paused = not self.paused
+                        console.print(f"Playback {'[yellow]PAUSED[/yellow]' if self.paused else '[green]RESUMED[/green]'}")
                     elif chr(key) in MODEL_REGISTRY:  # Switch Model
                         self.switch_model(chr(key))
                     elif key in [ord("s"), ord("S")]:  # Snapshot
@@ -545,6 +694,8 @@ def main() -> int:
     parser.add_argument("--thresh", type=float, default=0.45, help="Confidence threshold (default: 0.45)")
     parser.add_argument("--duration", type=float, default=None, help="Optional duration in seconds to run before auto-exiting")
     parser.add_argument("--no-gui", action="store_true", help="Run without opening GUI window (for headless/automated tests)")
+    parser.add_argument("--no-loop", action="store_true", help="Do not loop video playback when end is reached")
+    parser.add_argument("--stretch", action="store_true", help="Disable letterboxing and stretch image directly to target resolution")
 
     args = parser.parse_args()
 
@@ -554,6 +705,8 @@ def main() -> int:
         source=args.source,
         initial_key=args.model,
         confidence_thresh=args.thresh,
+        loop=not args.no_loop,
+        stretch=args.stretch,
     )
 
     inspector.run(max_duration_sec=args.duration, no_gui=args.no_gui)

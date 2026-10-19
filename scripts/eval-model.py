@@ -162,7 +162,7 @@ def detect_layout_and_resolution(shape: List[int]) -> Tuple[str, Tuple[int, int]
     return "UNKNOWN", (0, 0)
 
 
-def prepare_input_tensor(tensor_info: Dict[str, Any], sample_image_path: Optional[str] = None) -> np.ndarray:
+def prepare_input_tensor(tensor_info: Dict[str, Any], sample_image_path: Optional[str] = None, model_name: str = "") -> np.ndarray:
     """Prepare properly formatted and scaled input tensor (from image or dummy synthetic data)."""
     shape = tensor_info["shape"]
     dtype = tensor_info["dtype"]
@@ -190,8 +190,13 @@ def prepare_input_tensor(tensor_info: Dict[str, Any], sample_image_path: Optiona
                 quantized = np.round(img_data / (255.0 * scale) + zp)
                 return np.clip(quantized, -128, 127).astype(np.int8)
             else:
-                # Float32 normalized in [0.0, 1.0]
-                return (img_data / 255.0).astype(np.float32)
+                if "efficientdet" in model_name.lower():
+                    return img_data.astype(np.float32)
+                elif "ssd_mobilenet" in model_name.lower():
+                    return ((img_data / 127.5) - 1.0).astype(np.float32)
+                else:
+                    # Float32 normalized in [0.0, 1.0]
+                    return (img_data / 255.0).astype(np.float32)
 
     # Fallback to synthetic dummy tensor
     if dtype == np.uint8:
@@ -226,14 +231,14 @@ def extract_person_score(model_name: str, interpreter: Interpreter) -> Optional[
             for od in out_details:
                 out_tensor = interpreter.get_tensor(od["index"])
                 if out_tensor.ndim == 3 and out_tensor.shape[2] in (90, 91):
-                    person_scores = out_tensor[0, :, 1]
+                    person_scores = np.maximum(out_tensor[0, :, 0], out_tensor[0, :, 1])
                     return float(np.max(person_scores))
         elif "efficientdet" in model_name.lower():
-            # EfficientDet: StatefulPartitionedCall:1 is scores (1, 19206, 90), class 0/1 = person
+            # EfficientDet: StatefulPartitionedCall:1 is scores (1, 19206, 90), class 0 is person
             for od in out_details:
                 out_tensor = interpreter.get_tensor(od["index"])
                 if out_tensor.ndim == 3 and out_tensor.shape[2] in (90, 91):
-                    person_scores = out_tensor[0, :, 1]
+                    person_scores = np.maximum(out_tensor[0, :, 0], out_tensor[0, :, 1])
                     return float(np.max(person_scores))
     except Exception:
         pass
@@ -434,7 +439,7 @@ class ModelEvaluator:
 
         try:
             # Prepare input tensor for each input
-            inputs = [prepare_input_tensor(inp, self.sample_image) for inp in input_details]
+            inputs = [prepare_input_tensor(inp, self.sample_image, model_name=filename) for inp in input_details]
 
             # Warmup runs
             for _ in range(self.warmup_runs):
