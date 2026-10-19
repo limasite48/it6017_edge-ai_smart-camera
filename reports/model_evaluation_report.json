@@ -1,0 +1,495 @@
+{
+  "timestamp": "2026-10-18 16:34:14",
+  "hardware_profiles": {
+    "rockchip_rv1109": {
+      "name": "Rockchip RV1109 / Ingenic T31 (Target Comparison Camera)",
+      "cpu": "Dual-core ARM Cortex-A7 @ 1.5 GHz",
+      "npu_tops": 1.2,
+      "npu_supported_types": [
+        "int8",
+        "int16"
+      ],
+      "total_ram_mb": 128.0,
+      "max_model_ram_mb": 30.0,
+      "flash_rom_mb": 32.0,
+      "recommended_max_file_size_mb": 6.0,
+      "critical_max_file_size_mb": 10.0
+    },
+    "xiaomi_12s_pro": {
+      "name": "Xiaomi 12S Pro (Experimental Testbed Benchmark)",
+      "cpu": "Qualcomm Snapdragon 8+ Gen 1 (Cortex-X2/A710/A510)",
+      "gpu_npu": "Adreno 730 GPU + Hexagon NPU (Android NNAPI)",
+      "total_ram_mb": 8192.0
+    }
+  },
+  "results": [
+    {
+      "filename": "efficientdet_lite0_fp32.tflite",
+      "filepath": "D:\\_work\\_hust\\IT6017 - Digital Transform\\it6017_edge-ai_smart-camera\\models\\efficientdet_lite0_fp32.tflite",
+      "file_size_mb": 13.2,
+      "sha256": "40338edf5ec70d43e318b0a716a84d4564cd1802759a7a07170c7e43796dbf58",
+      "is_duplicate": false,
+      "duplicate_of": null,
+      "input_tensors": [
+        {
+          "name": "serving_default_images:0",
+          "shape": [
+            1,
+            320,
+            320,
+            3
+          ],
+          "dtype": "float32",
+          "scale": 0.0,
+          "zero_point": 0
+        }
+      ],
+      "output_tensors": [
+        {
+          "name": "StatefulPartitionedCall:1",
+          "shape": [
+            1,
+            19206,
+            90
+          ],
+          "dtype": "float32",
+          "scale": 0.0,
+          "zero_point": 0
+        },
+        {
+          "name": "StatefulPartitionedCall:0",
+          "shape": [
+            1,
+            19206,
+            4
+          ],
+          "dtype": "float32",
+          "scale": 0.0,
+          "zero_point": 0
+        }
+      ],
+      "input_layout": "NHWC",
+      "input_resolution": [
+        320,
+        320
+      ],
+      "total_tensors": 523,
+      "weight_dtype_counts": {
+        "float32": 517,
+        "int32": 6
+      },
+      "int8_weight_ratio_pct": 0.0,
+      "quantization_type": "FP32",
+      "inference_success": true,
+      "latency_mean_ms": 35.54,
+      "latency_min_ms": 34.48,
+      "latency_max_ms": 36.87,
+      "latency_std_ms": 0.71,
+      "fps": 28.1,
+      "process_memory_mb": 12.83,
+      "flash_rom_fit": "FAIL",
+      "npu_fit": "UNSUITABLE",
+      "spec_conformance": "PASS",
+      "overall_status": "WARN",
+      "person_detection_score": 0.012857982888817787,
+      "issues": [
+        "Model size (13.2 MB) exceeds maximum flash budget (<= 10.0 MB) for embedded cameras.",
+        "FP32 arithmetic unsupported on RV1109 1.2 TOPS integer NPU. Fallback to dual Cortex-A7 CPU will cause low FPS (< 3 FPS)."
+      ],
+      "remediations": [
+        "Model cannot be deployed on 16MB/32MB flash without severe system compression."
+      ]
+    },
+    {
+      "filename": "efficientdet_lite0_int8.tflite",
+      "filepath": "D:\\_work\\_hust\\IT6017 - Digital Transform\\it6017_edge-ai_smart-camera\\models\\efficientdet_lite0_int8.tflite",
+      "file_size_mb": 4.39,
+      "sha256": "0720bf247bd76e6594ea28fa9c6f7c5242be774818997dbbeffc4da460c723bb",
+      "is_duplicate": false,
+      "duplicate_of": null,
+      "input_tensors": [
+        {
+          "name": "serving_default_images:0",
+          "shape": [
+            1,
+            320,
+            320,
+            3
+          ],
+          "dtype": "uint8",
+          "scale": 0.0078125,
+          "zero_point": 127
+        }
+      ],
+      "output_tensors": [
+        {
+          "name": "StatefulPartitionedCall:1",
+          "shape": [
+            1,
+            19206,
+            90
+          ],
+          "dtype": "float32",
+          "scale": 0.0,
+          "zero_point": 0
+        },
+        {
+          "name": "StatefulPartitionedCall:0",
+          "shape": [
+            1,
+            19206,
+            4
+          ],
+          "dtype": "float32",
+          "scale": 0.0,
+          "zero_point": 0
+        }
+      ],
+      "input_layout": "NHWC",
+      "input_resolution": [
+        320,
+        320
+      ],
+      "total_tensors": 597,
+      "weight_dtype_counts": {
+        "uint8": 1,
+        "int32": 188,
+        "int8": 406,
+        "float32": 2
+      },
+      "int8_weight_ratio_pct": 99.5,
+      "quantization_type": "FULL_INT8",
+      "inference_success": true,
+      "latency_mean_ms": 18.92,
+      "latency_min_ms": 18.43,
+      "latency_max_ms": 19.56,
+      "latency_std_ms": 0.37,
+      "fps": 52.8,
+      "process_memory_mb": 8.16,
+      "flash_rom_fit": "PASS",
+      "npu_fit": "FULL_SUPPORT",
+      "spec_conformance": "PASS",
+      "overall_status": "PASS",
+      "person_detection_score": 0.01171875,
+      "issues": [],
+      "remediations": []
+    },
+    {
+      "filename": "ssd_mobilenet_v2_fp32.tflite",
+      "filepath": "D:\\_work\\_hust\\IT6017 - Digital Transform\\it6017_edge-ai_smart-camera\\models\\ssd_mobilenet_v2_fp32.tflite",
+      "file_size_mb": 23.24,
+      "sha256": "cfaf369610e14d8663ab6726a9ea131e2143ac73ae505d5e74c927d4deab7267",
+      "is_duplicate": false,
+      "duplicate_of": null,
+      "input_tensors": [
+        {
+          "name": "normalized_input_image_tensor",
+          "shape": [
+            1,
+            300,
+            300,
+            3
+          ],
+          "dtype": "float32",
+          "scale": 0.0,
+          "zero_point": 0
+        }
+      ],
+      "output_tensors": [
+        {
+          "name": "TFLite_Detection_PostProcess",
+          "shape": [
+            1,
+            10,
+            4
+          ],
+          "dtype": "float32",
+          "scale": 0.0,
+          "zero_point": 0
+        },
+        {
+          "name": "TFLite_Detection_PostProcess:1",
+          "shape": [
+            1,
+            10
+          ],
+          "dtype": "float32",
+          "scale": 0.0,
+          "zero_point": 0
+        },
+        {
+          "name": "TFLite_Detection_PostProcess:2",
+          "shape": [
+            1,
+            10
+          ],
+          "dtype": "float32",
+          "scale": 0.0,
+          "zero_point": 0
+        },
+        {
+          "name": "TFLite_Detection_PostProcess:3",
+          "shape": [
+            1
+          ],
+          "dtype": "float32",
+          "scale": 0.0,
+          "zero_point": 0
+        }
+      ],
+      "input_layout": "NHWC",
+      "input_resolution": [
+        300,
+        300
+      ],
+      "total_tensors": 570,
+      "weight_dtype_counts": {
+        "float32": 411,
+        "int32": 3,
+        "uint8": 156
+      },
+      "int8_weight_ratio_pct": 27.5,
+      "quantization_type": "FP32",
+      "inference_success": true,
+      "latency_mean_ms": 98.06,
+      "latency_min_ms": 93.29,
+      "latency_max_ms": 100.1,
+      "latency_std_ms": 1.82,
+      "fps": 10.2,
+      "process_memory_mb": 66.62,
+      "flash_rom_fit": "FAIL",
+      "npu_fit": "UNSUITABLE",
+      "spec_conformance": "PASS",
+      "overall_status": "WARN",
+      "person_detection_score": 0.06601773202419281,
+      "issues": [
+        "Model size (23.2 MB) exceeds maximum flash budget (<= 10.0 MB) for embedded cameras.",
+        "FP32 arithmetic unsupported on RV1109 1.2 TOPS integer NPU. Fallback to dual Cortex-A7 CPU will cause low FPS (< 3 FPS)."
+      ],
+      "remediations": [
+        "Model cannot be deployed on 16MB/32MB flash without severe system compression."
+      ]
+    },
+    {
+      "filename": "ssd_mobilenet_v2_int8.tflite",
+      "filepath": "D:\\_work\\_hust\\IT6017 - Digital Transform\\it6017_edge-ai_smart-camera\\models\\ssd_mobilenet_v2_int8.tflite",
+      "file_size_mb": 5.93,
+      "sha256": "42fb3d70ffb7bb37dd518f730f7be784b831c2078f30c497d0019cc2e987fa26",
+      "is_duplicate": false,
+      "duplicate_of": null,
+      "input_tensors": [
+        {
+          "name": "normalized_input_image_tensor",
+          "shape": [
+            1,
+            300,
+            300,
+            3
+          ],
+          "dtype": "uint8",
+          "scale": 0.0078125,
+          "zero_point": 128
+        }
+      ],
+      "output_tensors": [
+        {
+          "name": "TFLite_Detection_PostProcess",
+          "shape": [
+            1,
+            20,
+            4
+          ],
+          "dtype": "float32",
+          "scale": 0.0,
+          "zero_point": 0
+        },
+        {
+          "name": "TFLite_Detection_PostProcess:1",
+          "shape": [
+            1,
+            20
+          ],
+          "dtype": "float32",
+          "scale": 0.0,
+          "zero_point": 0
+        },
+        {
+          "name": "TFLite_Detection_PostProcess:2",
+          "shape": [
+            1,
+            20
+          ],
+          "dtype": "float32",
+          "scale": 0.0,
+          "zero_point": 0
+        },
+        {
+          "name": "TFLite_Detection_PostProcess:3",
+          "shape": [
+            1
+          ],
+          "dtype": "float32",
+          "scale": 0.0,
+          "zero_point": 0
+        }
+      ],
+      "input_layout": "NHWC",
+      "input_resolution": [
+        300,
+        300
+      ],
+      "total_tensors": 265,
+      "weight_dtype_counts": {
+        "uint8": 181,
+        "float32": 9,
+        "int32": 75
+      },
+      "int8_weight_ratio_pct": 95.3,
+      "quantization_type": "FULL_INT8",
+      "inference_success": true,
+      "latency_mean_ms": 21.62,
+      "latency_min_ms": 20.61,
+      "latency_max_ms": 23.09,
+      "latency_std_ms": 0.78,
+      "fps": 46.2,
+      "process_memory_mb": 2.16,
+      "flash_rom_fit": "PASS",
+      "npu_fit": "FULL_SUPPORT",
+      "spec_conformance": "PASS",
+      "overall_status": "PASS",
+      "person_detection_score": 0.0546875,
+      "issues": [],
+      "remediations": []
+    },
+    {
+      "filename": "yolov8n_320_fp32.tflite",
+      "filepath": "D:\\_work\\_hust\\IT6017 - Digital Transform\\it6017_edge-ai_smart-camera\\models\\yolov8n_320_fp32.tflite",
+      "file_size_mb": 12.17,
+      "sha256": "00093c7d9693e39692878fa86eae56ef0398b639bd55399032092abf4f55725f",
+      "is_duplicate": false,
+      "duplicate_of": null,
+      "input_tensors": [
+        {
+          "name": "serving_default_args_0",
+          "shape": [
+            1,
+            3,
+            320,
+            320
+          ],
+          "dtype": "float32",
+          "scale": 0.0,
+          "zero_point": 0
+        }
+      ],
+      "output_tensors": [
+        {
+          "name": "serving_default_output_0_output",
+          "shape": [
+            1,
+            84,
+            2100
+          ],
+          "dtype": "float32",
+          "scale": 0.0,
+          "zero_point": 0
+        }
+      ],
+      "input_layout": "NCHW",
+      "input_resolution": [
+        320,
+        320
+      ],
+      "total_tensors": 415,
+      "weight_dtype_counts": {
+        "float32": 389,
+        "int32": 26
+      },
+      "int8_weight_ratio_pct": 0.0,
+      "quantization_type": "FP32",
+      "inference_success": true,
+      "latency_mean_ms": 38.3,
+      "latency_min_ms": 36.04,
+      "latency_max_ms": 39.7,
+      "latency_std_ms": 0.95,
+      "fps": 26.1,
+      "process_memory_mb": 6.02,
+      "flash_rom_fit": "FAIL",
+      "npu_fit": "UNSUITABLE",
+      "spec_conformance": "PASS",
+      "overall_status": "WARN",
+      "person_detection_score": 0.0070056128315627575,
+      "issues": [
+        "Model size (12.2 MB) exceeds maximum flash budget (<= 10.0 MB) for embedded cameras.",
+        "FP32 arithmetic unsupported on RV1109 1.2 TOPS integer NPU. Fallback to dual Cortex-A7 CPU will cause low FPS (< 3 FPS)."
+      ],
+      "remediations": [
+        "Model cannot be deployed on 16MB/32MB flash without severe system compression."
+      ]
+    },
+    {
+      "filename": "yolov8n_320_int8.tflite",
+      "filepath": "D:\\_work\\_hust\\IT6017 - Digital Transform\\it6017_edge-ai_smart-camera\\models\\yolov8n_320_int8.tflite",
+      "file_size_mb": 3.31,
+      "sha256": "ad0102592c6d70b9db9163a4d50114424f98bf620e08bd9daa40ee44f1f0a2b8",
+      "is_duplicate": false,
+      "duplicate_of": null,
+      "input_tensors": [
+        {
+          "name": "serving_default_args_0",
+          "shape": [
+            1,
+            3,
+            320,
+            320
+          ],
+          "dtype": "float32",
+          "scale": 0.0,
+          "zero_point": 0
+        }
+      ],
+      "output_tensors": [
+        {
+          "name": "serving_default_output_0_output_dequant",
+          "shape": [
+            1,
+            84,
+            2100
+          ],
+          "dtype": "float32",
+          "scale": 0.0,
+          "zero_point": 0
+        }
+      ],
+      "input_layout": "NCHW",
+      "input_resolution": [
+        320,
+        320
+      ],
+      "total_tensors": 448,
+      "weight_dtype_counts": {
+        "float32": 2,
+        "int8": 356,
+        "int32": 90
+      },
+      "int8_weight_ratio_pct": 99.4,
+      "quantization_type": "WEIGHT_INT8",
+      "inference_success": true,
+      "latency_mean_ms": 10.7,
+      "latency_min_ms": 9.48,
+      "latency_max_ms": 11.44,
+      "latency_std_ms": 0.66,
+      "fps": 93.5,
+      "process_memory_mb": 4.69,
+      "flash_rom_fit": "PASS",
+      "npu_fit": "PARTIAL_SUPPORT",
+      "spec_conformance": "PASS",
+      "overall_status": "PASS",
+      "person_detection_score": 0.008189046755433083,
+      "issues": [
+        "Model uses FP32 I/O with INT8 weights. Embedded NPU may require host CPU dequantization."
+      ],
+      "remediations": []
+    }
+  ]
+}

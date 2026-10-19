@@ -1,0 +1,14 @@
+[project]
+name = "it6017-edge-ai-smart-camera"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "ai-edge-litert>=2.3.0",
+    "numpy>=2.2.6",
+    "rich>=15.0.0",
+    "tabulate>=0.10.0",
+    "tensorflow-cpu>=2.21.0",
+    "ultralytics>=8.4.123",
+]

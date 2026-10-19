@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual Environment
+.venv/
+venv/
+ENV/
+env/
+
+# Model Checkpoints & Legacy Archive
+models_legacy/
+*.pt
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Evaluation Reports (optional: user can commit or ignore, let's keep tracked or ignore temporary run logs)
+# reports/
