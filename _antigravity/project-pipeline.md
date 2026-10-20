@@ -63,8 +63,69 @@
         - General Multi-Class Object Mode: `reports/video_all_classes_evaluation_report.md`
       * Confirmed that Full INT8 models (SSD MobileNetV2 INT8 ~20ms / 46 FPS; EfficientDet INT8 ~18ms / 47 FPS; YOLOv8n INT8 ~10.5ms / 79 FPS) deliver 3x to 4x CPU speedups with minimal precision degradation.
 
-# Phase 2: Setting up a testbed on the Xiaomi 12S Pro smartphone
-# Phase 3: Real-world performance testing on smartphones (Latency, FPS, RAM, Power)
+# Phase 2: Setting up a testbed on the Xiaomi 12S Pro smartphone [COMPLETED]
+2.1/ Toolchain Setup & Device Hardware Audit [COMPLETED]
+    - Downloaded and established standalone Google Android Platform-Tools in `tools/platform-tools/`.
+    - Automated inspection engine: `scripts/inspect_device.py`.
+    - Target testbed verified: Xiaomi 12S Pro (`2206122SC` / board `unicorn`), Android 13 (API 33), HyperOS/MIUI V14.0.8.0.
+    - Verified SoC: Qualcomm Snapdragon 8+ Gen 1 (SM8475, 4nm), 8 cores (1x Cortex-X2 @ 3.19GHz + 3x Cortex-A710 @ 2.75GHz + 4x Cortex-A510 @ 2.02GHz).
+    - Verified AI / Graphics Acceleration: Qualcomm Adreno 730 GPU (OpenCL driver verified), Hexagon DSP / NPU (`qti-dsp` via Android NNAPI).
+    - Audited resources: 7.02 GB usable LPDDR5 RAM, 65 GB available UFS 3.1 storage, battery temp ~30°C nominal baseline.
+    - Audit reports: `reports/smartphone_hardware_audit.md` and `reports/smartphone_hardware_audit.json`.
+
+2.2/ On-Device Binary & Model Deployment [COMPLETED]
+    - Sourced Google's official native ARM64 `benchmark_model` ELF binary (`arm64-v8a`) to `tools/bin/benchmark_model`.
+    - Established target directories on phone: `/data/local/tmp/it6017/bin/` and `/data/local/tmp/it6017/models/`.
+    - Pushed `benchmark_model` and granted executable permissions (`chmod 755`).
+    - Synchronized all 6 standardized models from the 3x2 matrix (`ssd_mobilenet_v2`, `efficientdet_lite0`, `yolov8n_320` in FP32 and INT8) to the smartphone.
+
+2.3/ Benchmark Automation & Thermal Guard Engine [COMPLETED]
+    - Automated mobile orchestrator: `scripts/run_smartphone_benchmark.py`.
+    - 4 Execution Delegates:
+      * CPU 1 Thread (`--num_threads=1`): Simulating low-power single-core embedded camera SoC execution.
+      * CPU 4 Threads (`--num_threads=4`): Multi-core mobile baseline with XNNPACK acceleration.
+      * GPU OpenCL (`--use_gpu=true`): Qualcomm Adreno 730 GPU acceleration.
+      * NNAPI (`--use_nnapi=true`): Qualcomm Hexagon DSP / NPU hardware execution.
+    - Strict Thermal Guard & Stability:
+      * Automatic battery/chassis temperature polling before every test run.
+      * Auto-pause protection if temp >= 42°C until cooled to < 38°C.
+      * Increased cool-down pause to 3.5s between delegate runs, maintaining thermal equilibrium (+1.3°C rise across 24 tests: 31.0°C to 32.3°C).
+    - Key Empirical Benchmark Results on Xiaomi 12S Pro:
+      * SSD MobileNetV2 INT8 on Hexagon NPU: **2.52 ms (397.6 FPS)** with only **18.6 MB RAM** (8.59x speedup over CPU 4T, 27x over CPU FP32).
+      * EfficientDet-Lite0 INT8 on CPU 4T: **7.28 ms (137.4 FPS)** with **29.2 MB RAM** (2.46x speedup over FP32).
+      * YOLOv8n INT8 on CPU 4T: **6.20 ms (161.3 FPS)** with **21.4 MB RAM** (2.48x speedup over FP32).
+      * Adreno 730 OpenCL GPU: Consistent ~11.2ms to 13.0ms execution across all INT8 and FP32 architectures (77 to 89 FPS).
+      * Memory & Embedded Camera Viability: All INT8 models consume <= 29.2 MB peak RAM, comfortably within the 128 MB RAM ceiling of target Rockchip RV1109 / Ingenic T31 cameras.
+    - Reports generated: `reports/smartphone_benchmark_report.md` and `reports/smartphone_benchmark_report.json`.
+# Phase 3: Real-world performance testing on smartphones (Latency, FPS, RAM, Power) [PLANNED]
+3.1/ Sustained Load & DVFS Thermal Throttling Profiling
+    - Continuous multi-minute execution (180s per test configuration) on the 3 deployment-viable INT8 models (`yolov8n_320_int8`, `efficientdet_lite0_int8`, `ssd_mobilenet_v2_int8`) plus `yolov8n_320_fp32` as reference.
+    - 1 Hz live telemetry polling across 8 CPU cores:
+      * Little Cluster (4x Cortex-A510): `/sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq`
+      * Mid Cluster (3x Cortex-A710): `/sys/devices/system/cpu/cpu4/cpufreq/scaling_cur_freq`
+      * Prime Core (1x Cortex-X2): `/sys/devices/system/cpu/cpu7/cpufreq/scaling_cur_freq`
+      * Thermal monitoring: SoC thermal zones (`/sys/class/thermal/thermal_zone0/temp`) and battery temperature.
+    - Quantify thermal degradation penalty: initial cold latency vs thermally saturated steady-state latency.
+    - 60-second recovery cool-down between test suites.
+    - Script: `scripts/run_smartphone_stress_test.py`.
+
+3.2/ Power & Energy Consumption Profiling
+    - Battery discharge tracking via `dumpsys battery` (voltage $V$ in mV, capacity delta) and `dumpsys batterystats` discharge rates ($\text{mAh} / \text{hr}$).
+    - Compute effective system power draw ($P = V \times I_{\text{avg}}$ in Watts) and energy efficiency ($E = P / \text{FPS}$ in mJ per frame / inference).
+    - Measure empirical energy reduction of INT8 quantization versus FP32 across architectures.
+    - Contrast mobile power profiles against Rockchip RV1109 / Ingenic T31 5W system power envelopes.
+    - Script: `scripts/run_smartphone_power_profile.py`.
+
+3.3/ End-to-End Pipeline Latency Breakdown
+    - Measure complete edge processing pipeline on smartphone:
+      $\text{Total Latency} = T_{\text{preprocess}} (\text{letterbox padding/scaling}) + T_{\text{inference}} + T_{\text{postprocess}} (\text{multi-class NMS/box unpadding})$.
+    - Quantify pre/post-processing bottlenecks on mobile CPU versus accelerated model inference.
+
+3.4/ Phase 3 Documentation & Comparative Synthesis
+    - Generate comprehensive markdown and JSON reports:
+      * `reports/smartphone_stress_thermal_report.md`
+      * `reports/smartphone_power_energy_report.md`
+      * `reports/smartphone_phase3_telemetry.json`
 # Phase 4: Accuracy Evaluation (mAP) and Testing Conversion to Embedded NPU on a Laptop
 # Phase 5: Mapping Data to Camera SoC (Rockchip RV1109 / Ingenic T31) and Data Visualization
 # Phase 6: Expansion to a fire detection model (provisionally set aside; to be implemented once the project has stabilized)

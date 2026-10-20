@@ -1,0 +1,54 @@
+{
+  "timestamp": "2026-10-20T07:00:01.575424+00:00",
+  "identity": {
+    "model": "2206122SC",
+    "brand": "Xiaomi",
+    "manufacturer": "Xiaomi",
+    "device_code": "unicorn",
+    "android_version": "13",
+    "sdk_version": "33",
+    "os_flavor": "V140",
+    "build_id": "TKQ1.220829.002 test-keys",
+    "fingerprint": "Xiaomi/unicorn/unicorn:13/TKQ1.220829.002/V14.0.8.0.TLECNXM:user/release-keys"
+  },
+  "soc_cpu": {
+    "soc_name": "SM8475",
+    "hardware": "qcom",
+    "board_platform": "taro",
+    "primary_abi": "arm64-v8a",
+    "supported_abis": "arm64-v8a,armeabi-v7a,armeabi",
+    "online_cpus": "0-7",
+    "cluster_frequencies": {
+      "core_0_Little (Cortex-A510)": "2.02 GHz",
+      "core_4_Mid (Cortex-A710)": "2.75 GHz",
+      "core_7_Prime (Cortex-X2)": "3.19 GHz"
+    }
+  },
+  "gpu_ai": {
+    "gpu_vendor": "Qualcomm",
+    "gpu_renderer": "Qualcomm, Adreno (TM) 730, OpenGL ES 3.2 V@0615.50 (GIT@5e81ec0141, Icc5bd9b9d5, 1667818169) (Date:11/07/22)",
+    "opencl_supported": true,
+    "opencl_libraries": [
+      "/system/vendor/lib64/libOpenCL.so",
+      "/vendor/lib64/libOpenCL.so"
+    ],
+    "vulkan_supported": true,
+    "hexagon_qnn_supported": false,
+    "nnapi_accelerator_available": true
+  },
+  "memory_storage": {
+    "total_ram_gb": 7.02,
+    "available_ram_gb": 1.71,
+    "internal_storage_total": "105G",
+    "internal_storage_avail": "65G"
+  },
+  "thermal_battery": {
+    "battery_level": "32%",
+    "battery_temperature": "30.2 °C",
+    "charging_status": "2"
+  },
+  "permissions_env": {
+    "selinux_mode": "Enforcing",
+    "data_local_tmp_writable": true
+  }
+}

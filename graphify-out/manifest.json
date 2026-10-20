@@ -72,16 +72,16 @@
     "semantic_hash": "4077b41ae430aa914d8db1a08fa7fa18"
   },
   "_antigravity/project-pipeline.md": {
-    "mtime": 1792387285.8418818,
-    "seen": 1792390289.1527288,
-    "ast_hash": "b983d44bc45a82ee45ff7c76e399c1c0",
-    "semantic_hash": "b983d44bc45a82ee45ff7c76e399c1c0"
+    "mtime": 1792483615.4703138,
+    "seen": 1792483708.306494,
+    "ast_hash": "aeaed92ca4f31238a2053c336438092d",
+    "semantic_hash": ""
   },
   "_antigravity/v0-0-1_handout.md": {
-    "mtime": 1792389758.096885,
-    "seen": 1792390289.1527288,
-    "ast_hash": "ea3e02cea66725b2768f728f5432c2f1",
-    "semantic_hash": "ea3e02cea66725b2768f728f5432c2f1"
+    "mtime": 1792393540.7830062,
+    "seen": 1792483708.306494,
+    "ast_hash": "a7f2a6665c698f06dda225f58d839b52",
+    "semantic_hash": ""
   },
   "reports/model_evaluation_report.md": {
     "mtime": 1792379786.3734343,
@@ -100,5 +100,53 @@
     "seen": 1792390289.1527288,
     "ast_hash": "a315cceb2199f4d6dc2b4ea1cb8565f1",
     "semantic_hash": "a315cceb2199f4d6dc2b4ea1cb8565f1"
+  },
+  "reports/smartphone_benchmark_report.json": {
+    "mtime": 1792482574.1944008,
+    "seen": 1792483708.306494,
+    "ast_hash": "9e1a69779cf8a189da73d7a047b016dd",
+    "semantic_hash": ""
+  },
+  "reports/smartphone_hardware_audit.json": {
+    "mtime": 1792479603.3638024,
+    "seen": 1792483708.306494,
+    "ast_hash": "d28c15a6d9da15f6509b398cec594726",
+    "semantic_hash": ""
+  },
+  "scripts/inspect_device.py": {
+    "mtime": 1792403261.6486797,
+    "seen": 1792483708.306494,
+    "ast_hash": "76ca4ec9a5863d744a9b28425df897cd",
+    "semantic_hash": ""
+  },
+  "scripts/run_smartphone_benchmark.py": {
+    "mtime": 1792482283.8451798,
+    "seen": 1792483708.306494,
+    "ast_hash": "c2a57b42664e3c069405efa17ae5ef0e",
+    "semantic_hash": ""
+  },
+  "_antigravity/v0-0-2_handout.md": {
+    "mtime": 1792483666.3700058,
+    "seen": 1792483708.306494,
+    "ast_hash": "d119ea2fe55216b61dec79269666b886",
+    "semantic_hash": ""
+  },
+  "reports/smartphone_benchmark_report.md": {
+    "mtime": 1792482574.195492,
+    "seen": 1792483708.306494,
+    "ast_hash": "ce2d784ac5a1bd6d6d7a87deb3316303",
+    "semantic_hash": ""
+  },
+  "reports/smartphone_hardware_audit.md": {
+    "mtime": 1792479603.3648014,
+    "seen": 1792483708.306494,
+    "ast_hash": "51c90537b84e53725d7ebc3dd649c2c4",
+    "semantic_hash": ""
+  },
+  "tools/platform-tools/NOTICE.txt": {
+    "mtime": 1792403131.7103171,
+    "seen": 1792483708.306494,
+    "ast_hash": "98dd3a8445fe2e775d11e8170066d1fb",
+    "semantic_hash": ""
   }
 }
