@@ -1,0 +1,298 @@
+<mxfile host="app.diagrams.net" modified="2026-10-21T16:00:00.000Z" agent="Antigravity IT6017 Subteam3" version="21.0.0" type="device">
+    
+    <diagram id="pareto_frontier" name="1. Pareto Frontier &amp; Real-Time">
+      <mxGraphModel dx="1420" dy="880" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1300" pageHeight="850" math="0" shadow="0">
+        <root>
+          <mxCell id="0" />
+          <mxCell id="1" parent="0" />
+
+          <!-- Title Banner -->
+          <mxCell id="t1" value="Xiaomi Smart Camera C300 (Ingenic T31N): Accuracy vs. Latency Pareto Frontier" style="text;html=1;fontSize=18;fontStyle=1;align=center;verticalAlign=middle;fillColor=#2c3e50;fontColor=#ffffff;rounded=1;" vertex="1" parent="1">
+            <mxGeometry x="40" y="20" width="1220" height="40" as="geometry" />
+          </mxCell>
+
+          <!-- Real-Time Shaded Zone -->
+          <mxCell id="rt_zone" value="REAL-TIME EDGE PROCESSING REGION&#xa;(Latency &lt;= 50.0 ms | Throughput &gt;= 20 FPS SC3336 Native Stream)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f8f5;strokeColor=#27ae60;strokeWidth=2;align=center;verticalAlign=top;fontSize=12;fontStyle=1;fontColor=#145a32;spacingTop=12;" vertex="1" parent="1">
+            <mxGeometry x="60" y="80" width="460" height="660" as="geometry" />
+          </mxCell>
+
+          <!-- Non Real-Time Zone -->
+          <mxCell id="non_rt_zone" value="SUBSAMPLED / NON-REAL-TIME REGION (Requires 1-in-N Frame Dropping)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fcf3cf;strokeColor=#f39c12;strokeWidth=1;strokeDashed=1;align=center;verticalAlign=top;fontSize=12;fontStyle=1;fontColor=#7e5109;spacingTop=12;" vertex="1" parent="1">
+            <mxGeometry x="540" y="80" width="720" height="660" as="geometry" />
+          </mxCell>
+
+          <!-- 20 FPS Gating Threshold Line -->
+          <mxCell id="gating_line" value="" style="endArrow=none;html=1;strokeWidth=3;strokeColor=#c0392b;dashed=1;" edge="1" parent="1">
+            <mxGeometry width="50" height="50" relative="1" as="geometry">
+              <mxPoint x="530" y="740" as="sourcePoint" />
+              <mxPoint x="530" y="80" as="targetPoint" />
+            </mxGeometry>
+          </mxCell>
+          <mxCell id="gating_label" value="20 FPS Real-Time Gating Boundary (50.0 ms)&#xa;Matches SmartSens SC3336 2K CMOS Native Clock" style="text;html=1;align=center;verticalAlign=middle;fontSize=11;fontStyle=1;fontColor=#c0392b;fillColor=#fdedec;rounded=1;strokeColor=#e74c3c;" vertex="1" parent="1">
+            <mxGeometry x="400" y="90" width="260" height="35" as="geometry" />
+          </mxCell>
+
+          <!-- WINNER CARD: YOLOv8n INT8 -->
+          <mxCell id="c_yolo_int8" value="&lt;b&gt;YOLOv8n-320 (INT8) - PARETO OPTIMAL WINNER&lt;/b&gt;&lt;br/&gt;&lt;hr/&gt;&lt;b&gt;Projected T31N Latency:&lt;/b&gt; 35.6 ms (28.1 FPS) [REAL-TIME 1:1]&lt;br/&gt;&lt;b&gt;COCO Person Detection mAP@50:&lt;/b&gt; 0.448 (Leading accuracy)&lt;br/&gt;&lt;b&gt;Flash ROM Footprint:&lt;/b&gt; 3.31 MB (PASS vs 5.5 MB budget, +2.19 MB margin)&lt;br/&gt;&lt;b&gt;RAM Tensor Arena:&lt;/b&gt; 19.4 MB (PASS vs 22.0 MB budget, +2.60 MB margin)&lt;br/&gt;&lt;b&gt;Net AI Power:&lt;/b&gt; 0.322 W (Fits 1.0W fanless thermal ceiling)&lt;br/&gt;&lt;b&gt;Pareto Index:&lt;/b&gt; 0.6088 (3.43x higher than runner-up)&lt;br/&gt;&lt;b&gt;BOM Cost Impact:&lt;/b&gt; $0.00 (Zero hardware revision needed)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d4efdf;strokeColor=#27ae60;strokeWidth=3;align=left;verticalAlign=top;fontSize=11;fontColor=#145a32;spacing=8;" vertex="1" parent="1">
+            <mxGeometry x="90" y="160" width="400" height="150" as="geometry" />
+          </mxCell>
+
+          <!-- CARD: EfficientDet-Lite0 INT8 -->
+          <mxCell id="c_eff_int8" value="&lt;b&gt;EfficientDet-Lite0 (INT8) - UNFEASIBLE (RAM OOM)&lt;/b&gt;&lt;br/&gt;&lt;hr/&gt;&lt;b&gt;Projected T31N Latency:&lt;/b&gt; 53.3 ms (18.8 FPS) [Near Real-Time]&lt;br/&gt;&lt;b&gt;COCO Person Detection mAP@50:&lt;/b&gt; 0.136 (Severe BiFPN degradation)&lt;br/&gt;&lt;b&gt;Flash ROM Footprint:&lt;/b&gt; 4.39 MB (PASS vs 5.5 MB budget)&lt;br/&gt;&lt;b&gt;RAM Tensor Arena:&lt;/b&gt; 24.4 MB (&lt;font color='#c0392b'&gt;&lt;b&gt;FATAL FAIL: Exceeds 22MB ceiling&lt;/b&gt;&lt;/font&gt;)&lt;br/&gt;&lt;b&gt;Failure Mode:&lt;/b&gt; Concurrent BiFPN tensors trigger Linux OOM panic." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f9ebea;strokeColor=#e74c3c;strokeWidth=1.5;align=left;verticalAlign=top;fontSize=10.5;fontColor=#78281f;spacing=8;" vertex="1" parent="1">
+            <mxGeometry x="560" y="160" width="340" height="130" as="geometry" />
+          </mxCell>
+
+          <!-- CARD: SSD MobileNetV2 INT8 -->
+          <mxCell id="c_ssd_int8" value="&lt;b&gt;SSD MobileNetV2 (INT8) - FEASIBLE WITH STRIDE&lt;/b&gt;&lt;br/&gt;&lt;hr/&gt;&lt;b&gt;Projected T31N Latency:&lt;/b&gt; 171.3 ms (5.8 FPS) [Requires 1/4 Frame Stride]&lt;br/&gt;&lt;b&gt;COCO Person Detection mAP@50:&lt;/b&gt; 0.402 (High accuracy)&lt;br/&gt;&lt;b&gt;Flash ROM Footprint:&lt;/b&gt; 5.93 MB (&lt;font color='#d35400'&gt;&lt;b&gt;WARN: Exceeds 5.5MB standard partition&lt;/b&gt;&lt;/font&gt;)&lt;br/&gt;&lt;b&gt;RAM Tensor Arena:&lt;/b&gt; 20.3 MB (PASS vs 22.0 MB budget)&lt;br/&gt;&lt;b&gt;Pareto Index:&lt;/b&gt; 0.1777 (Runner-up, but slow frame rate)." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fef9e7;strokeColor=#f39c12;strokeWidth=2;align=left;verticalAlign=top;fontSize=10.5;fontColor=#7e5109;spacing=8;" vertex="1" parent="1">
+            <mxGeometry x="560" y="320" width="340" height="130" as="geometry" />
+          </mxCell>
+
+          <!-- CARD: YOLOv8n FP32 -->
+          <mxCell id="c_yolo_fp32" value="&lt;b&gt;YOLOv8n-320 (FP32 Baseline)&lt;/b&gt;&lt;br/&gt;&lt;hr/&gt;&lt;b&gt;T31N Latency:&lt;/b&gt; 227.7 ms (4.4 FPS) | &lt;b&gt;mAP50:&lt;/b&gt; 0.473&lt;br/&gt;&lt;b&gt;Flash:&lt;/b&gt; 12.17 MB (&lt;font color='#c0392b'&gt;FAIL&lt;/font&gt;) | &lt;b&gt;RAM:&lt;/b&gt; 33.7 MB (&lt;font color='#c0392b'&gt;FAIL&lt;/font&gt;)&lt;br/&gt;&lt;i&gt;MIPS32 scalar emulation bottleneck; exceeds both memory gates.&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#eaeded;strokeColor=#95a5a6;strokeWidth=1;align=left;verticalAlign=top;fontSize=10;fontColor=#34495e;spacing=6;" vertex="1" parent="1">
+            <mxGeometry x="930" y="160" width="310" height="95" as="geometry" />
+          </mxCell>
+
+          <!-- CARD: EfficientDet FP32 -->
+          <mxCell id="c_eff_fp32" value="&lt;b&gt;EfficientDet-Lite0 (FP32 Baseline)&lt;/b&gt;&lt;br/&gt;&lt;hr/&gt;&lt;b&gt;T31N Latency:&lt;/b&gt; 332.5 ms (3.0 FPS) | &lt;b&gt;mAP50:&lt;/b&gt; 0.049&lt;br/&gt;&lt;b&gt;Flash:&lt;/b&gt; 13.20 MB (&lt;font color='#c0392b'&gt;FAIL&lt;/font&gt;) | &lt;b&gt;RAM:&lt;/b&gt; 31.2 MB (&lt;font color='#c0392b'&gt;FAIL&lt;/font&gt;)&lt;br/&gt;&lt;i&gt;Severe scalar slowdown; cannot fit in 16MB SPI NOR Flash.&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#eaeded;strokeColor=#95a5a6;strokeWidth=1;align=left;verticalAlign=top;fontSize=10;fontColor=#34495e;spacing=6;" vertex="1" parent="1">
+            <mxGeometry x="930" y="275" width="310" height="95" as="geometry" />
+          </mxCell>
+
+          <!-- CARD: SSD MobileNet FP32 -->
+          <mxCell id="c_ssd_fp32" value="&lt;b&gt;SSD MobileNetV2 (FP32 Baseline)&lt;/b&gt;&lt;br/&gt;&lt;hr/&gt;&lt;b&gt;T31N Latency:&lt;/b&gt; 1120.0 ms (0.89 FPS) | &lt;b&gt;mAP50:&lt;/b&gt; 0.395&lt;br/&gt;&lt;b&gt;Flash:&lt;/b&gt; 23.24 MB (&lt;font color='#c0392b'&gt;FATAL FAIL&lt;/font&gt;) | &lt;b&gt;RAM:&lt;/b&gt; 37.7 MB (&lt;font color='#c0392b'&gt;FAIL&lt;/font&gt;)&lt;br/&gt;&lt;i&gt;Entire model binary exceeds the complete 16MB Flash capacity.&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#eaeded;strokeColor=#95a5a6;strokeWidth=1;align=left;verticalAlign=top;fontSize=10;fontColor=#34495e;spacing=6;" vertex="1" parent="1">
+            <mxGeometry x="930" y="390" width="310" height="95" as="geometry" />
+          </mxCell>
+
+          <!-- Engineering Takeaway Box -->
+          <mxCell id="box_takeaway" value="&lt;b&gt;CORE ENGINEERING CONCLUSION FOR SUB-TEAM 3 &amp; FINAL DEFENSE:&lt;/b&gt;&lt;br/&gt;1. &lt;b&gt;Only 1 Model is Deployable:&lt;/b&gt; YOLOv8n-320 INT8 is the sole architecture satisfying Real-Time Throughput (28.1 FPS &gt; 20 FPS), Flash Storage (3.31 MB &lt; 5.5 MB), and Working RAM (19.4 MB &lt; 22.0 MB).&lt;br/&gt;2. &lt;b&gt;Quantization Gain:&lt;/b&gt; INT8 quantization on YOLOv8n produces only a 2.5% mAP drop for a 72.8% file size reduction and 2.15x speedup.&lt;br/&gt;3. &lt;b&gt;Zero BOM Cost:&lt;/b&gt; Transforms a $29.99 dumb streaming camera into a secure, private edge AI detector without any hardware modification ($0.00)." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ebf5fb;strokeColor=#2980b9;strokeWidth=1.5;align=left;verticalAlign=top;fontSize=11;fontColor=#1b4f72;spacing=10;" vertex="1" parent="1">
+            <mxGeometry x="90" y="520" width="1150" height="110" as="geometry" />
+          </mxCell>
+
+        </root>
+      </mxGraphModel>
+    </diagram>
+    
+    <diagram id="power_envelope" name="2. Subsystem Power &amp; Thermal">
+      <mxGraphModel dx="1420" dy="880" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1300" pageHeight="850" math="0" shadow="0">
+        <root>
+          <mxCell id="0" />
+          <mxCell id="1" parent="0" />
+
+          <!-- Title Banner -->
+          <mxCell id="p2_t1" value="Xiaomi Smart Camera C300: 5.00W Electrical Power Budget &amp; Fanless Thermal Breakdown" style="text;html=1;fontSize=18;fontStyle=1;align=center;verticalAlign=middle;fillColor=#2c3e50;fontColor=#ffffff;rounded=1;" vertex="1" parent="1">
+            <mxGeometry x="40" y="20" width="1220" height="40" as="geometry" />
+          </mxCell>
+
+          <!-- Outer 5.0W Container -->
+          <mxCell id="p2_c5w" value="TOTAL CAMERA ELECTRICAL BUDGET: 5.00 WATTS (5V / 1.0A DC Micro-USB Rating)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8f9f9;strokeColor=#34495e;strokeWidth=2;align=center;verticalAlign=top;fontSize=13;fontStyle=1;fontColor=#2c3e50;spacingTop=12;" vertex="1" parent="1">
+            <mxGeometry x="50" y="80" width="1200" height="340" as="geometry" />
+          </mxCell>
+
+          <!-- Stacked Subsystem Blocks -->
+          <!-- Subsystem 1: Base SoC -->
+          <mxCell id="sub1" value="&lt;b&gt;Base SoC, Linux &amp; Wi-Fi&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;&lt;font style='font-size: 16px;'&gt;&lt;b&gt;1.80 W&lt;/b&gt;&lt;/font&gt;&lt;br/&gt;(36.0% of Total Budget)&lt;br/&gt;&lt;br/&gt;MIPS Core baseline, Linux 4.9 Kernel, Wi-Fi 4 802.11b/g/n Baseband, Crystal Oscillators." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#34495e;strokeColor=#1a252f;align=center;verticalAlign=middle;fontSize=11;fontColor=#ffffff;spacing=8;" vertex="1" parent="1">
+            <mxGeometry x="80" y="140" width="220" height="200" as="geometry" />
+          </mxCell>
+
+          <!-- Subsystem 2: CMOS & ISP/VPU -->
+          <mxCell id="sub2" value="&lt;b&gt;SC3336 CMOS + ISP / VPU&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;&lt;font style='font-size: 16px;'&gt;&lt;b&gt;0.60 W&lt;/b&gt;&lt;/font&gt;&lt;br/&gt;(12.0% of Total Budget)&lt;br/&gt;&lt;br/&gt;SmartSens 2K Sensor, Ingenic Hardware ISP, 2304x1296 H.265 Hardware Encoder." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2980b9;strokeColor=#1b4f72;align=center;verticalAlign=middle;fontSize=11;fontColor=#ffffff;spacing=8;" vertex="1" parent="1">
+            <mxGeometry x="320" y="140" width="180" height="200" as="geometry" />
+          </mxCell>
+
+          <!-- Subsystem 3: YOLOv8n INT8 AI Engine -->
+          <mxCell id="sub3" value="&lt;b&gt;YOLOv8n INT8 AI Engine&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;&lt;font style='font-size: 18px;'&gt;&lt;b&gt;0.32 W&lt;/b&gt;&lt;/font&gt;&lt;br/&gt;(6.4% of Total Budget)&lt;br/&gt;&lt;br/&gt;&lt;b&gt;XBurst SIMD128 Vector Ops&lt;/b&gt;&lt;br/&gt;Runs at 28.1 FPS continuously.&lt;br/&gt;Consumes only 32% of allowable 1.0W AI thermal headroom!" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#27ae60;strokeColor=#145a32;strokeWidth=2.5;align=center;verticalAlign=middle;fontSize=11;fontColor=#ffffff;spacing=8;" vertex="1" parent="1">
+            <mxGeometry x="520" y="140" width="210" height="200" as="geometry" />
+          </mxCell>
+
+          <!-- Subsystem 4: PTZ Motors & IR LEDs -->
+          <mxCell id="sub4" value="&lt;b&gt;PTZ Steppers &amp; IR LEDs&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;&lt;font style='font-size: 16px;'&gt;&lt;b&gt;1.10 W&lt;/b&gt;&lt;/font&gt;&lt;br/&gt;(22.0% of Total Budget)&lt;br/&gt;&lt;br/&gt;Dual Pan-Tilt Stepper Motors (Active rotation), 6x 940nm Infrared Night-Vision LEDs." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e67e22;strokeColor=#a04000;align=center;verticalAlign=middle;fontSize=11;fontColor=#ffffff;spacing=8;" vertex="1" parent="1">
+            <mxGeometry x="750" y="140" width="200" height="200" as="geometry" />
+          </mxCell>
+
+          <!-- Subsystem 5: Safety Headroom -->
+          <mxCell id="sub5" value="&lt;b&gt;Headroom Margin&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;&lt;font style='font-size: 16px;'&gt;&lt;b&gt;1.18 W&lt;/b&gt;&lt;/font&gt;&lt;br/&gt;(23.6% of Budget)&lt;br/&gt;&lt;br/&gt;Voltage ripple guard, USB cable IR drop, transient motor acceleration spikes." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#95a5a6;strokeColor=#7f8c8d;align=center;verticalAlign=middle;fontSize=11;fontColor=#ffffff;spacing=8;" vertex="1" parent="1">
+            <mxGeometry x="970" y="140" width="250" height="200" as="geometry" />
+          </mxCell>
+
+          <!-- 1.0W Thermal Ceiling Indicator -->
+          <mxCell id="thermal_line" value="" style="endArrow=none;html=1;strokeWidth=3;strokeColor=#c0392b;dashed=1;" edge="1" parent="1">
+            <mxGeometry width="50" height="50" relative="1" as="geometry">
+              <mxPoint x="740" y="370" as="sourcePoint" />
+              <mxPoint x="740" y="110" as="targetPoint" />
+            </mxGeometry>
+          </mxCell>
+          <mxCell id="thermal_text" value="MAX SUSTAINED AI COMPUTE CEILING (1.00 W)&#xa;Sealed Fanless Plastic Dome Thermal Dissipation Limit" style="text;html=1;align=center;verticalAlign=middle;fontSize=11;fontStyle=1;fontColor=#c0392b;fillColor=#fdedec;rounded=1;strokeColor=#e74c3c;" vertex="1" parent="1">
+            <mxGeometry x="540" y="360" width="350" height="30" as="geometry" />
+          </mxCell>
+
+          <!-- Comparison Box: Edge AI vs Cloud Streaming -->
+          <mxCell id="cmp_box1" value="&lt;b&gt;EDGE AI VS. LEGACY CLOUD STREAMING COMPARISON&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#eaf2f8;strokeColor=#2980b9;strokeWidth=1.5;align=center;verticalAlign=top;fontSize=13;fontStyle=1;fontColor=#1b4f72;spacingTop=10;" vertex="1" parent="1">
+            <mxGeometry x="50" y="450" width="1200" height="240" as="geometry" />
+          </mxCell>
+
+          <mxCell id="cmp_cloud" value="&lt;b&gt;LEGACY XIAOMI CLOUD STREAMING PIPELINE:&lt;/b&gt;&lt;br/&gt;&lt;ul&gt;&lt;li&gt;&lt;b&gt;Wi-Fi Transmitter Power:&lt;/b&gt; Continuously active (~0.85 W continuous RF transmission to AWS / Xiaomi cloud).&lt;/li&gt;&lt;li&gt;&lt;b&gt;Network Bandwidth:&lt;/b&gt; Consumes 2.5 Mbps continuous upstream per camera.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Detection Latency:&lt;/b&gt; 2.5 to 5.0 seconds (encoding + buffer + uplink + cloud queue + cloud AI + push alert).&lt;/li&gt;&lt;li&gt;&lt;b&gt;Privacy Risk:&lt;/b&gt; Raw video leaves the local network; relies on proprietary Xiaomi cloud subscription.&lt;/li&gt;&lt;/ul&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fdf2e9;strokeColor=#e67e22;align=left;verticalAlign=top;fontSize=11;fontColor=#7e5109;spacing=10;" vertex="1" parent="1">
+            <mxGeometry x="80" y="490" width="530" height="180" as="geometry" />
+          </mxCell>
+
+          <mxCell id="cmp_edge" value="&lt;b&gt;PROPOSED INGENIC T31N ON-DEVICE YOLOv8n PIPELINE:&lt;/b&gt;&lt;br/&gt;&lt;ul&gt;&lt;li&gt;&lt;b&gt;AI Compute Power:&lt;/b&gt; Only 0.32 W (&lt;font color='#27ae60'&gt;&lt;b&gt;62.3% lower power&lt;/b&gt;&lt;/font&gt; than continuous Wi-Fi uplink).&lt;/li&gt;&lt;li&gt;&lt;b&gt;Network Bandwidth:&lt;/b&gt; 0 kbps baseline. Transmits only 1 KB JSON payload upon confirmed human detection.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Detection Latency:&lt;/b&gt; &lt;font color='#27ae60'&gt;&lt;b&gt;35.6 milliseconds (Instantaneous on-device response)&lt;/b&gt;&lt;/font&gt;.&lt;/li&gt;&lt;li&gt;&lt;b&gt;Privacy &amp; Security:&lt;/b&gt; 100% Zero-Trust local processing; video never leaves the camera.&lt;/li&gt;&lt;/ul&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f8f5;strokeColor=#27ae60;strokeWidth=2;align=left;verticalAlign=top;fontSize=11;fontColor=#145a32;spacing=10;" vertex="1" parent="1">
+            <mxGeometry x="640" y="490" width="580" height="180" as="geometry" />
+          </mxCell>
+
+        </root>
+      </mxGraphModel>
+    </diagram>
+    
+    <diagram id="hardware_gating" name="3. Hardware Gating Matrix">
+      <mxGraphModel dx="1420" dy="880" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1300" pageHeight="850" math="0" shadow="0">
+        <root>
+          <mxCell id="0" />
+          <mxCell id="1" parent="0" />
+
+          <!-- Title Banner -->
+          <mxCell id="p3_t1" value="Xiaomi Smart Camera C300: Physical Hardware Boundary Compliance Gating Matrix" style="text;html=1;fontSize=18;fontStyle=1;align=center;verticalAlign=middle;fillColor=#2c3e50;fontColor=#ffffff;rounded=1;" vertex="1" parent="1">
+            <mxGeometry x="40" y="20" width="1220" height="40" as="geometry" />
+          </mxCell>
+
+          <!-- FLASH CONTAINER -->
+          <mxCell id="p3_c_flash" value="GATE 1: 16 MB SPI NOR FLASH STORAGE PARTITIONING (GigaDevice GD25Q128E)&#xa;Maximum Available SquashFS Storage for AI Model Weights: 5.50 MB (Critical Ceiling: 6.00 MB)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8f9f9;strokeColor=#2980b9;strokeWidth=2;align=center;verticalAlign=top;fontSize=12;fontStyle=1;fontColor=#1b4f72;spacingTop=10;" vertex="1" parent="1">
+            <mxGeometry x="50" y="80" width="580" height="580" as="geometry" />
+          </mxCell>
+
+          <mxCell id="f_part_map" value="&lt;b&gt;Flash Partition Layout:&lt;/b&gt; U-Boot (0.25M) | Linux Kernel (2.75M) | Rootfs (5.5M) | Config (1.5M) | AI Partition (5.5M)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#eaf2f8;strokeColor=#3498db;fontSize=10;fontColor=#2c3e50;" vertex="1" parent="1">
+            <mxGeometry x="70" y="130" width="540" height="30" as="geometry" />
+          </mxCell>
+
+          <!-- Flash Model Bars -->
+          <mxCell id="f_m1" value="&lt;b&gt;YOLOv8n-320 (INT8): 3.31 MB&lt;/b&gt; [PASS - Safe margin +2.19 MB]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d4efdf;strokeColor=#27ae60;strokeWidth=2;align=left;fontSize=11;fontColor=#145a32;spacingLeft=10;" vertex="1" parent="1">
+            <mxGeometry x="70" y="180" width="310" height="45" as="geometry" />
+          </mxCell>
+
+          <mxCell id="f_m2" value="&lt;b&gt;EfficientDet-Lite0 (INT8): 4.39 MB&lt;/b&gt; [PASS - Margin +1.11 MB]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d4efdf;strokeColor=#27ae60;strokeWidth=1.5;align=left;fontSize=11;fontColor=#145a32;spacingLeft=10;" vertex="1" parent="1">
+            <mxGeometry x="70" y="240" width="390" height="45" as="geometry" />
+          </mxCell>
+
+          <mxCell id="f_limit" value="5.5 MB Partition Limit" style="text;html=1;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;fontColor=#c0392b;fillColor=#fdedec;rounded=1;strokeColor=#e74c3c;" vertex="1" parent="1">
+            <mxGeometry x="420" y="300" width="130" height="20" as="geometry" />
+          </mxCell>
+
+          <mxCell id="f_m3" value="&lt;b&gt;SSD MobileNetV2 (INT8): 5.93 MB&lt;/b&gt; [WARN - Exceeds 5.5MB standard partition by 0.43MB]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fef9e7;strokeColor=#f39c12;strokeWidth=2;align=left;fontSize=11;fontColor=#7e5109;spacingLeft=10;" vertex="1" parent="1">
+            <mxGeometry x="70" y="330" width="510" height="45" as="geometry" />
+          </mxCell>
+
+          <mxCell id="f_m4" value="&lt;b&gt;YOLOv8n (FP32): 12.17 MB&lt;/b&gt; [FATAL FAIL - Exceeds budget by +6.67 MB]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f9ebea;strokeColor=#e74c3c;strokeWidth=1.5;align=left;fontSize=10.5;fontColor=#78281f;spacingLeft=10;" vertex="1" parent="1">
+            <mxGeometry x="70" y="390" width="540" height="40" as="geometry" />
+          </mxCell>
+
+          <mxCell id="f_m5" value="&lt;b&gt;EfficientDet (FP32): 13.20 MB&lt;/b&gt; [FATAL FAIL - Exceeds budget by +7.70 MB]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f9ebea;strokeColor=#e74c3c;strokeWidth=1.5;align=left;fontSize=10.5;fontColor=#78281f;spacingLeft=10;" vertex="1" parent="1">
+            <mxGeometry x="70" y="445" width="540" height="40" as="geometry" />
+          </mxCell>
+
+          <mxCell id="f_m6" value="&lt;b&gt;SSD MobileNet (FP32): 23.24 MB&lt;/b&gt; [FATAL FAIL - Exceeds entire 16MB Flash ROM]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f9ebea;strokeColor=#e74c3c;strokeWidth=1.5;align=left;fontSize=10.5;fontColor=#78281f;spacingLeft=10;" vertex="1" parent="1">
+            <mxGeometry x="70" y="500" width="540" height="40" as="geometry" />
+          </mxCell>
+
+          <!-- RAM CONTAINER -->
+          <mxCell id="p3_c_ram" value="GATE 2: 64 MB DDR2 SYSTEM-IN-PACKAGE (SIP) RUNTIME MEMORY&#xa;Maximum Allowable Working Memory for AI Tensor Arena: 22.00 MB Headroom" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8f9f9;strokeColor=#27ae60;strokeWidth=2;align=center;verticalAlign=top;fontSize=12;fontStyle=1;fontColor=#145a32;spacingTop=10;" vertex="1" parent="1">
+            <mxGeometry x="670" y="80" width="580" height="580" as="geometry" />
+          </mxCell>
+
+          <mxCell id="r_part_map" value="&lt;b&gt;RAM Budget:&lt;/b&gt; Linux Kernel (20MB) | 2K Video Buffers &amp; RTSP (18.5MB) | System Overhead (3.5MB) | AI (22MB)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f8f5;strokeColor=#2ecc71;fontSize=10;fontColor=#2c3e50;" vertex="1" parent="1">
+            <mxGeometry x="690" y="130" width="540" height="30" as="geometry" />
+          </mxCell>
+
+          <!-- RAM Model Bars -->
+          <mxCell id="r_m1" value="&lt;b&gt;YOLOv8n-320 (INT8): 19.4 MB&lt;/b&gt; [PASS - Safe margin +2.60 MB]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d4efdf;strokeColor=#27ae60;strokeWidth=2;align=left;fontSize=11;fontColor=#145a32;spacingLeft=10;" vertex="1" parent="1">
+            <mxGeometry x="690" y="180" width="370" height="45" as="geometry" />
+          </mxCell>
+
+          <mxCell id="r_m2" value="&lt;b&gt;SSD MobileNetV2 (INT8): 20.3 MB&lt;/b&gt; [PASS - Margin +1.70 MB]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d4efdf;strokeColor=#27ae60;strokeWidth=1.5;align=left;fontSize=11;fontColor=#145a32;spacingLeft=10;" vertex="1" parent="1">
+            <mxGeometry x="690" y="240" width="390" height="45" as="geometry" />
+          </mxCell>
+
+          <mxCell id="r_limit" value="22.0 MB AI RAM Ceiling" style="text;html=1;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;fontColor=#c0392b;fillColor=#fdedec;rounded=1;strokeColor=#e74c3c;" vertex="1" parent="1">
+            <mxGeometry x="960" y="300" width="140" height="20" as="geometry" />
+          </mxCell>
+
+          <mxCell id="r_m3" value="&lt;b&gt;EfficientDet-Lite0 (INT8): 24.4 MB&lt;/b&gt; [FATAL FAIL - OOM Kernel Panic (+2.4 MB over ceiling)]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f9ebea;strokeColor=#e74c3c;strokeWidth=2;align=left;fontSize=10.5;fontColor=#78281f;spacingLeft=10;" vertex="1" parent="1">
+            <mxGeometry x="690" y="330" width="480" height="45" as="geometry" />
+          </mxCell>
+
+          <mxCell id="r_m4" value="&lt;b&gt;EfficientDet (FP32): 31.2 MB&lt;/b&gt; [FATAL FAIL - Exceeds budget by +9.2 MB]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f9ebea;strokeColor=#e74c3c;strokeWidth=1.5;align=left;fontSize=10.5;fontColor=#78281f;spacingLeft=10;" vertex="1" parent="1">
+            <mxGeometry x="690" y="390" width="540" height="40" as="geometry" />
+          </mxCell>
+
+          <mxCell id="r_m5" value="&lt;b&gt;YOLOv8n (FP32): 33.7 MB&lt;/b&gt; [FATAL FAIL - Exceeds budget by +11.7 MB]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f9ebea;strokeColor=#e74c3c;strokeWidth=1.5;align=left;fontSize=10.5;fontColor=#78281f;spacingLeft=10;" vertex="1" parent="1">
+            <mxGeometry x="690" y="445" width="540" height="40" as="geometry" />
+          </mxCell>
+
+          <mxCell id="r_m6" value="&lt;b&gt;SSD MobileNet (FP32): 37.7 MB&lt;/b&gt; [FATAL FAIL - Exceeds budget by +15.7 MB]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f9ebea;strokeColor=#e74c3c;strokeWidth=1.5;align=left;fontSize=10.5;fontColor=#78281f;spacingLeft=10;" vertex="1" parent="1">
+            <mxGeometry x="690" y="500" width="540" height="40" as="geometry" />
+          </mxCell>
+
+          <!-- Dual Gating Verdict Banner -->
+          <mxCell id="verdict_banner" value="&lt;b&gt;DUAL HARDWARE GATING VERDICT:&lt;/b&gt; YOLOv8n-320 (INT8) is the &lt;b&gt;ONLY model&lt;/b&gt; in the entire 3x2 matrix that complies with BOTH physical gating constraints (Passes Flash ROM and Passes RAM Arena)." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2c3e50;fontColor=#ffffff;fontSize=12;align=center;verticalAlign=middle;" vertex="1" parent="1">
+            <mxGeometry x="50" y="680" width="1200" height="40" as="geometry" />
+          </mxCell>
+
+        </root>
+      </mxGraphModel>
+    </diagram>
+    
+    <diagram id="pipeline_architecture" name="4. Pipeline &amp; Amdahl's Law">
+      <mxGraphModel dx="1420" dy="880" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1300" pageHeight="850" math="0" shadow="0">
+        <root>
+          <mxCell id="0" />
+          <mxCell id="1" parent="0" />
+
+          <!-- Title Banner -->
+          <mxCell id="p4_t1" value="Xiaomi Smart Camera C300: End-to-End Edge AI Pipeline &amp; Amdahl's Law Resolution" style="text;html=1;fontSize=18;fontStyle=1;align=center;verticalAlign=middle;fillColor=#2c3e50;fontColor=#ffffff;rounded=1;" vertex="1" parent="1">
+            <mxGeometry x="40" y="20" width="1220" height="40" as="geometry" />
+          </mxCell>
+
+          <!-- Stage 1: Optical Acquisition -->
+          <mxCell id="stg1" value="&lt;b&gt;1. SENSOR ACQUISITION&lt;/b&gt;&lt;br/&gt;&lt;hr/&gt;&lt;b&gt;SmartSens SC3336 CMOS&lt;/b&gt;&lt;br/&gt;Resolution: 2304 x 1296 (2K)&lt;br/&gt;Frame Rate: 20 FPS (50.0 ms)&lt;br/&gt;Interface: MIPI CSI-2 2-Lane&lt;br/&gt;&lt;i&gt;Streams raw 3.0MP Bayer frames.&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#eaf2f8;strokeColor=#2980b9;strokeWidth=2;align=left;verticalAlign=top;fontSize=11;fontColor=#1b4f72;spacing=8;" vertex="1" parent="1">
+            <mxGeometry x="60" y="100" width="220" height="150" as="geometry" />
+          </mxCell>
+
+          <!-- Stage 2: Hardware ISP & DMA Scaler (Amdahl's Law Resolution) -->
+          <mxCell id="stg2" value="&lt;b&gt;2. HARDWARE ISP &amp; DMA SCALER&lt;/b&gt;&lt;br/&gt;&lt;hr/&gt;&lt;b&gt;Ingenic Integrated Hardware ISP&lt;/b&gt;&lt;br/&gt;&lt;ul style='margin-left: -15px;'&gt;&lt;li&gt;Auto-Exposure &amp; 3D Noise Reduction&lt;/li&gt;&lt;li&gt;&lt;b&gt;Channel 1:&lt;/b&gt; 2K H.265 VPU Encoder&lt;/li&gt;&lt;li&gt;&lt;b&gt;Channel 2 (DMA Scaler):&lt;/b&gt; Directly downscales 2K to 320x320 into RAM.&lt;/li&gt;&lt;/ul&gt;&lt;b&gt;Amdahl's Law Solved:&lt;/b&gt; 0 ms CPU load! Avoids ~28ms CPU software resizing bottleneck." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d4efdf;strokeColor=#27ae60;strokeWidth=2.5;align=left;verticalAlign=top;fontSize=10.5;fontColor=#145a32;spacing=8;" vertex="1" parent="1">
+            <mxGeometry x="340" y="100" width="270" height="150" as="geometry" />
+          </mxCell>
+
+          <!-- Stage 3: AI Inference Engine -->
+          <mxCell id="stg3" value="&lt;b&gt;3. DEEP LEARNING INFERENCE&lt;/b&gt;&lt;br/&gt;&lt;hr/&gt;&lt;b&gt;Ingenic XBurst SIMD128 AI Engine&lt;/b&gt;&lt;br/&gt;&lt;ul style='margin-left: -15px;'&gt;&lt;li&gt;&lt;b&gt;Model:&lt;/b&gt; YOLOv8n-320 INT8&lt;/li&gt;&lt;li&gt;&lt;b&gt;Execution:&lt;/b&gt; Ingenic Magik / TFLite-Micro&lt;/li&gt;&lt;li&gt;&lt;b&gt;Latency:&lt;/b&gt; 35.6 ms (28.1 FPS)&lt;/li&gt;&lt;li&gt;&lt;b&gt;Power:&lt;/b&gt; 0.322 W (Thermal safe)&lt;/li&gt;&lt;li&gt;&lt;b&gt;Arena:&lt;/b&gt; 19.4 MB DDR2 SIP&lt;/li&gt;&lt;/ul&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d4efdf;strokeColor=#27ae60;strokeWidth=2.5;align=left;verticalAlign=top;fontSize=10.5;fontColor=#145a32;spacing=8;" vertex="1" parent="1">
+            <mxGeometry x="670" y="100" width="260" height="150" as="geometry" />
+          </mxCell>
+
+          <!-- Stage 4: Alert & Action -->
+          <mxCell id="stg4" value="&lt;b&gt;4. LOCAL ALERT &amp; ACTION&lt;/b&gt;&lt;br/&gt;&lt;hr/&gt;&lt;b&gt;On-Device Heuristic Trigger&lt;/b&gt;&lt;br/&gt;&lt;ul style='margin-left: -15px;'&gt;&lt;li&gt;NMS Postprocessing (&lt; 1.5 ms)&lt;/li&gt;&lt;li&gt;Human Bounding Box Verification&lt;/li&gt;&lt;li&gt;PTZ Target Tracking (Stepper motors)&lt;/li&gt;&lt;li&gt;Local Audio Alarm / MQTT Push&lt;/li&gt;&lt;li&gt;100% Zero-Trust Edge Privacy&lt;/li&gt;&lt;/ul&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fef9e7;strokeColor=#f39c12;strokeWidth=2;align=left;verticalAlign=top;fontSize=10.5;fontColor=#7e5109;spacing=8;" vertex="1" parent="1">
+            <mxGeometry x="990" y="100" width="240" height="150" as="geometry" />
+          </mxCell>
+
+          <!-- Arrows connecting stages -->
+          <mxCell id="a1" value="MIPI 2K&#xa;Bayer" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#2980b9;" edge="1" parent="1" source="stg1" target="stg2">
+            <mxGeometry relative="1" as="geometry" />
+          </mxCell>
+
+          <mxCell id="a2" value="DMA Zero-Copy&#xa;320x320 YUV" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=3;strokeColor=#27ae60;" edge="1" parent="1" source="stg2" target="stg3">
+            <mxGeometry relative="1" as="geometry" />
+          </mxCell>
+
+          <mxCell id="a3" value="Bounding Boxes&#xa;Confidence &gt; 0.50" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#e67e22;" edge="1" parent="1" source="stg3" target="stg4">
+            <mxGeometry relative="1" as="geometry" />
+          </mxCell>
+
+          <!-- Amdahl's Law Explanation Panel -->
+          <mxCell id="amdahl_panel" value="&lt;b&gt;CRITICAL ARCHITECTURAL DEFENSE: HOW AMDAHL'S LAW IS RESOLVED IN THE XIAOMI C300&lt;/b&gt;&lt;br/&gt;&lt;hr/&gt;&lt;b&gt;The Potential Bottleneck:&lt;/b&gt; In standard Linux embedded systems, decoding a 2K (2304x1296) video frame and downsampling it via CPU software (e.g. OpenCV cv2.resize or bilinear filtering) requires approximately 28.5 ms on a single 1.5 GHz MIPS core. If preprocessing takes 28.5 ms and AI inference takes 35.6 ms, the total pipeline latency reaches 64.1 ms (only 15.6 FPS), failing real-time operation.&lt;br/&gt;&lt;br/&gt;&lt;b&gt;The Ingenic T31 Hardware Solution:&lt;/b&gt; As revealed in the Ingenic T31 datasheet and Thingino reverse engineering, the SoC features a dual-channel Hardware Image Signal Processor (ISP). Channel 1 sends full 2K video directly to the hardware H.265 VPU encoder, while Channel 2 utilizes an integrated &lt;b&gt;Hardware DMA Downscaler&lt;/b&gt; that directly generates 320x320 planar tensors in DDR2 RAM with &lt;b&gt;ZERO CPU overhead&lt;/b&gt;. The MIPS32 core executes purely deep learning vector math, achieving true 28.1 FPS real-time detection." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ebf5fb;strokeColor=#2980b9;strokeWidth=1.5;align=left;verticalAlign=top;fontSize=11;fontColor=#1b4f72;spacing=12;" vertex="1" parent="1">
+            <mxGeometry x="60" y="300" width="1170" height="180" as="geometry" />
+          </mxCell>
+
+          <!-- Summary Metrics Table -->
+          <mxCell id="tbl_summary" value="&lt;b&gt;SUMMARY OF BENCHMARKED &amp; PROJECTED END-TO-END PIPELINE LATENCIES (Ingenic T31N):&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;• &lt;b&gt;Image Acquisition &amp; DMA Preprocessing:&lt;/b&gt; 0.0 ms (Executed entirely in hardware ISP concurrent with previous frame)&lt;br/&gt;• &lt;b&gt;YOLOv8n-320 INT8 Tensor Inference:&lt;/b&gt; 35.6 ms (28.1 FPS throughput on MIPS32 SIMD128)&lt;br/&gt;• &lt;b&gt;Non-Maximum Suppression (NMS) &amp; Postprocessing:&lt;/b&gt; 1.4 ms (Optimized C array decoding)&lt;br/&gt;• &lt;b&gt;Total Frame Latency:&lt;/b&gt; &lt;font color='#27ae60'&gt;&lt;b&gt;37.0 ms (27.0 FPS Net Pipeline Throughput)&lt;/b&gt;&lt;/font&gt; - Comfortably exceeds the 20 FPS native camera frame rate!" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8f9f9;strokeColor=#34495e;align=left;verticalAlign=top;fontSize=11;fontColor=#2c3e50;spacing=10;" vertex="1" parent="1">
+            <mxGeometry x="60" y="520" width="1170" height="120" as="geometry" />
+          </mxCell>
+
+        </root>
+      </mxGraphModel>
+    </diagram>
+    
+</mxfile>

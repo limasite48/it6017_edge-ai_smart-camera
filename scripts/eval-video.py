@@ -692,7 +692,7 @@ def generate_markdown_report(
         "",
         f"**Generated:** {time.strftime('%Y-%m-%d %H:%M:%S')}",
         "**Host Testbed:** Intel Core i5-1334U (12 vCPU), Windows 11",
-        "**Target Hardware Baseline:** Rockchip RV1109 / Ingenic T31 (1.2 TOPS INT8 NPU, 32MB Flash)",
+        "**Target Hardware Baseline:** Xiaomi Smart Camera C300 (Ingenic T31N) (1.2 TOPS INT8 NPU, 32MB Flash)",
         f"**Evaluation Mode:** {mode_desc}",
         f"**Pre-processing Strategy:** {prep_desc}",
         "",

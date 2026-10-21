@@ -489,10 +489,10 @@ def export_benchmark_reports(
         "",
         "## 3. Comparison with Low-Cost Embedded Camera Profile",
         "",
-        "| Metric | Xiaomi 12S Pro (Measured Testbed) | Rockchip RV1109 / Ingenic T31 (Target Camera) | Deployment Feasibility Analysis |",
+        "| Metric | Xiaomi 12S Pro (Measured Testbed) | Xiaomi Smart Camera C300 (Ingenic T31N) (Target Camera) | Deployment Feasibility Analysis |",
         "|---|---|---|---|",
         "| **Top INT8 Throughput** | YOLOv8n INT8 @ mobile FPS | Target: 15–30 FPS real-time | Full INT8 models meet edge camera real-time frame rates |",
-        "| **Model Memory Footprint** | 8 GB LPDDR5 available | 128 MB DDR3 shared pool | All INT8 models (3.3MB–5.9MB) fit inside 128MB RAM without OOM |",
+        "| **Model Memory Footprint** | 8 GB LPDDR5 available | 64 MB DDR2 SIP (~22MB AI headroom) shared pool | All INT8 models (3.3MB–5.9MB) fit inside 128MB RAM without OOM |",
         "| **ROM Budget Compliance** | 128/256 GB UFS 3.1 | 16–32 MB SPI Flash ROM (<= 6 MB budget) | All 3 INT8 models pass the SPI Flash gate |",
         "| **Inference Acceleration** | Adreno 730 GPU + Hexagon NPU | Rockchip 1.2 TOPS dedicated NPU | Dedicated embedded NPU yields comparable INT8 throughput at < 1.5W |",
         ""

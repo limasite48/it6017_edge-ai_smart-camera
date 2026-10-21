@@ -1,0 +1,7 @@
+Model Key,Model Name,Precision,Ingenic T31N Latency (ms),Ingenic T31N Throughput (FPS),Real-Time 20 FPS Compliant,Required Frame Stride,COCO Person mAP@50,COCO Person mAP@75,COCO Person mAP@50-95,Flash ROM Size (MB),Flash Limit (MB),Flash Margin (MB),Flash Verdict,Working RAM Arena (MB),RAM Limit (MB),RAM Margin (MB),RAM Verdict,Net AI Compute Power (W),Dynamic Energy per Frame (mJ),Pareto Trade-Off Score,Overall Feasibility Verdict
+yolov8n_320_int8,YOLOv8n - Nano (INT8),INT8,35.6,28.1,YES,1,0.448,0.321,0.298,3.31,5.5,2.19,PASS,19.4,22.0,2.6,PASS,0.322,12.46,0.6088,HIGHLY_FEASIBLE
+efficientdet_lite0_int8,EfficientDet-Lite0 (INT8),INT8,53.3,18.8,NO,2,0.136,0.017,0.039,4.39,5.5,1.11,PASS,24.4,22.0,-2.4,FAIL,0.132,18.65,0.1808,UNFEASIBLE
+ssd_mobilenet_v2_int8,SSD MobileNetV2 (INT8),INT8,171.3,5.8,NO,4,0.402,0.246,0.237,5.93,5.5,-0.43,WARN,20.3,22.0,1.7,PASS,0.109,59.95,0.1777,FEASIBLE_WITH_SUBSAMPLING
+yolov8n_320_fp32,YOLOv8n - Nano (FP32),FP32,227.7,4.4,NO,5,0.473,0.348,0.344,12.17,5.5,-6.67,FAIL,33.7,22.0,-11.7,FAIL,0.132,79.69,0.0384,UNFEASIBLE
+ssd_mobilenet_v2_fp32,SSD MobileNetV2 (FP32),FP32,1120.0,0.9,NO,23,0.395,0.25,0.233,23.24,5.5,-17.74,FAIL,37.7,22.0,-15.7,FAIL,0.125,392.0,0.0032,UNFEASIBLE
+efficientdet_lite0_fp32,EfficientDet-Lite0 (FP32),FP32,332.5,3.0,NO,7,0.049,0.009,0.015,13.2,5.5,-7.7,FAIL,31.2,22.0,-9.2,FAIL,0.125,116.37,0.0029,UNFEASIBLE

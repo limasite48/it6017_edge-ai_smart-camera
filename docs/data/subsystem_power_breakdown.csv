@@ -1,0 +1,7 @@
+Subsystem,Operating Description,Power Allocation (Watts),Share of Total Budget (%)
+"Base SoC, Linux Kernel, Wi-Fi 4",Continuous baseline clock tree and network,1.8,36.0
+SmartSens SC3336 CMOS + Hardware ISP / VPU,Image acquisition and 2K H.265 compression,0.6,12.0
+Ingenic XBurst SIMD128 AI Engine (YOLOv8n INT8),Deep learning inference @ 28.1 FPS,0.32,6.4
+Dual PTZ Motors & 850nm IR LEDs,Mechanical pan-tilt and night-vision lighting,1.1,22.0
+Voltage Fluctuation & Thermal Headroom Margin,Safety margin against USB voltage drops,1.18,23.6
+TOTAL ELECTRICAL BUDGET (5V / 1A),Maximum rated USB adapter power rating,5.0,100.0

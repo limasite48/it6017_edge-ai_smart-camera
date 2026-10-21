@@ -8,7 +8,7 @@ Evaluates:
 - Inference: On-device accelerated execution across 4 mobile delegates (CPU 1T, CPU 4T, GPU OpenCL, Hexagon NPU)
 - Postprocessing: Coordinate unpadding, confidence thresholding, multi-class NMS, smart camera alert trigger
 - Amdahl's Law Bottleneck Analysis: Demonstrates how NPU acceleration (e.g. 2.52ms) shifts system bottleneck to CPU data movement
-- Commercial camera implications: Explains the architectural necessity of hardware ISP and DMA resizing in RV1109/T31 SoCs
+- Commercial camera implications: Explains the architectural necessity of hardware ISP and DMA resizing in Ingenic T31N
 - Dual report generation: reports/smartphone_pipeline_report.md & .json
 """
 
@@ -327,7 +327,7 @@ def generate_pipeline_reports(data: Dict[str, Any], reports_dir: Path) -> Tuple[
         f"> **Generated**: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')}  ",
         f"> **Video Testbed**: `{data['video_source']}` ({data['frames_evaluated']} frames)  ",
         "> **Formula**: $T_{\\text{pipeline}} = T_{\\text{preprocess}} + T_{\\text{inference}} + T_{\\text{postprocess}}$  ",
-        "> **Target Profile**: Embedded Smart Camera (Rockchip RV1109 / Ingenic T31)  ",
+        "> **Target Profile**: Xiaomi Smart Camera C300 (Ingenic T31N)  ",
         "",
         "---",
         "",
@@ -368,9 +368,9 @@ def generate_pipeline_reports(data: Dict[str, Any], reports_dir: Path) -> Tuple[
         "  $$\\text{Speedup}_{\\text{system}} = \\frac{1}{(1 - P) + \\frac{P}{S_{\\text{NPU}}}}$$ ",
         "  Even with an infinite NPU acceleration ($S_{\\text{NPU}} \\to \\infty$), maximum system throughput is strictly bounded by CPU data movement: $\\frac{1}{1 - P} = \\frac{1000}{T_{\\text{pre}} + T_{\\text{post}}} \\approx 120\\text{ FPS}$.",
         "",
-        "### 2.2 Critical Design Implications for Commercial Smart Cameras (RV1109 / T31)",
+        "### 2.2 Critical Design Implications for Commercial Smart Cameras (Xiaomi C300 / Ingenic T31N)",
         "This empirical finding delivers a crucial insight for Sub-team 4 (Reverse Engineering and Architectural Synthesis):",
-        "1. **Dedicated Hardware ISP is Mandatory**: On low-cost smart cameras (dual Cortex-A7 @ 1.2 GHz), CPU-based letterbox resizing would take > 25 ms, crippling FPS. Commercial camera SoCs like the Rockchip RV1109 and Ingenic T31 bypass this by routing camera MIPI-CSI frames directly through a **Hardware Image Signal Processor (ISP)** that handles multi-stream scaling and color conversion via Direct Memory Access (DMA) in zero CPU cycles.",
+        "1. **Dedicated Hardware ISP is Mandatory**: On low-cost smart cameras (such as Ingenic T31N MIPS32 @ 1.5 GHz), CPU-based letterbox resizing would take > 25 ms, crippling FPS. Commercial camera SoCs like the Ingenic T31N bypass this by routing camera MIPI-CSI frames directly through a **Hardware Image Signal Processor (ISP)** that handles multi-stream scaling and color conversion via Direct Memory Access (DMA) in zero CPU cycles.",
         "2. **Hardware Coordinate Decoding & NMS**: For ultra-fast models, post-processing on weak embedded CPUs becomes the primary framerate limiter. Edge AI cameras often implement hardware-assisted NMS or quantized anchor decoding to unlock true 30+ FPS edge throughput.",
         ""
     ])

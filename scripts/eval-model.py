@@ -30,16 +30,16 @@ console = Console()
 
 # Target hardware specifications (from project-overview.md)
 HARDWARE_PROFILES = {
-    "rockchip_rv1109": {
-        "name": "Rockchip RV1109 / Ingenic T31 (Target Comparison Camera)",
-        "cpu": "Dual-core ARM Cortex-A7 @ 1.5 GHz",
-        "npu_tops": 1.2,
-        "npu_supported_types": ["int8", "int16"],
-        "total_ram_mb": 128.0,
-        "max_model_ram_mb": 30.0,
-        "flash_rom_mb": 32.0,
-        "recommended_max_file_size_mb": 6.0,
-        "critical_max_file_size_mb": 10.0,
+    "xiaomi_c300_ingenic_t31n": {
+        "name": "Xiaomi Smart Camera C300 (Model: XMC01 / Ingenic T31N)",
+        "cpu": "1x Ingenic XBurst® (MIPS32r2 with SIMD128) @ 1.5 GHz",
+        "ai_engine": "SIMD128 Vector Deep Learning Engine (~0.3-0.5 TOPS INT8 eq.)",
+        "supported_types": ["int8"],
+        "total_ram_mb": 64.0,
+        "max_model_ram_mb": 22.0,
+        "flash_rom_mb": 16.0,
+        "recommended_max_file_size_mb": 5.5,
+        "critical_max_file_size_mb": 6.0,
     },
     "xiaomi_12s_pro": {
         "name": "Xiaomi 12S Pro (Experimental Testbed Benchmark)",
@@ -407,28 +407,29 @@ class ModelEvaluator:
         if quant_type == "FAKE_INT8":
             spec_status = "FAIL"
 
-        # Hardware budget evaluation (Rockchip RV1109 camera constraints)
-        rv1109_specs = HARDWARE_PROFILES["rockchip_rv1109"]
-        if file_size_mb <= rv1109_specs["recommended_max_file_size_mb"]:
+        # Hardware budget evaluation (Xiaomi Smart Camera C300 Ingenic T31N constraints)
+        c300_specs = HARDWARE_PROFILES["xiaomi_c300_ingenic_t31n"]
+        if file_size_mb <= c300_specs["recommended_max_file_size_mb"]:
             flash_fit = "PASS"
-        elif file_size_mb <= rv1109_specs["critical_max_file_size_mb"]:
+        elif file_size_mb <= c300_specs["critical_max_file_size_mb"]:
             flash_fit = "WARN"
-            issues.append(f"Model size ({file_size_mb:.1f} MB) exceeds recommended flash budget (<= {rv1109_specs['recommended_max_file_size_mb']} MB). Tight fit for 16MB/32MB SPI ROM.")
+            issues.append(f"Model size ({file_size_mb:.1f} MB) exceeds recommended flash budget (<= {c300_specs['recommended_max_file_size_mb']} MB). Tight fit for 16MB/32MB SPI ROM.")
             remediations.append("Apply INT8 quantization or model pruning to reduce flash footprint.")
         else:
             flash_fit = "FAIL"
-            issues.append(f"Model size ({file_size_mb:.1f} MB) exceeds maximum flash budget (<= {rv1109_specs['critical_max_file_size_mb']} MB) for embedded cameras.")
+            issues.append(f"Model size ({file_size_mb:.1f} MB) exceeds maximum flash budget (<= {c300_specs['critical_max_file_size_mb']} MB) for embedded cameras.")
             remediations.append("Model cannot be deployed on 16MB/32MB flash without severe system compression.")
 
         # NPU Fit
         if quant_type == "FULL_INT8":
-            npu_fit = "FULL_SUPPORT"
+            ai_fit = "FULL_SUPPORT"
         elif quant_type == "WEIGHT_INT8":
-            npu_fit = "PARTIAL_SUPPORT"
+            ai_fit = "PARTIAL_SUPPORT"
             issues.append("Model uses FP32 I/O with INT8 weights. Embedded NPU may require host CPU dequantization.")
         else:
-            npu_fit = "UNSUITABLE"
-            issues.append("FP32 arithmetic unsupported on RV1109 1.2 TOPS integer NPU. Fallback to dual Cortex-A7 CPU will cause low FPS (< 3 FPS).")
+            ai_fit = "UNSUITABLE"
+            issues.append("FP32 arithmetic unsupported on Ingenic T31N SIMD128 vector engine. Software FP32 fallback on 1.5GHz MIPS core will cause low throughput (< 2 FPS).")
+        npu_fit = ai_fit
 
         # Functional Smoke Test & Host Latency Benchmark
         latencies: List[float] = []
@@ -529,7 +530,7 @@ def display_rich_dashboard(results: List[ModelEvaluationResult]) -> None:
         Panel.fit(
             "[bold cyan]IT6017 - Digital Transformation: Edge AI Camera System[/bold cyan]\n"
             "[yellow]Phase 1.2: Human Detection Model Zoo Evaluation & Edge Hardware Verification[/yellow]\n"
-            f"[dim]Evaluated {len(results)} models against Rockchip RV1109 & Xiaomi 12S Pro specifications[/dim]",
+            f"[dim]Evaluated {len(results)} models against Xiaomi C300 (Ingenic T31N) & Xiaomi 12S Pro specifications[/dim]",
             border_style="cyan",
             box=box.ROUNDED,
         )
@@ -548,7 +549,7 @@ def display_rich_dashboard(results: List[ModelEvaluationResult]) -> None:
         table.add_column("Size", justify="right")
         table.add_column("Host Latency", justify="right")
         table.add_column("Host FPS", justify="right")
-        table.add_column("RV1109 NPU", justify="center")
+        table.add_column("C300 Ingenic", justify="center")
         table.add_column("Flash ROM", justify="center")
         table.add_column("Verdict", justify="center")
 
@@ -636,7 +637,7 @@ def display_rich_dashboard(results: List[ModelEvaluationResult]) -> None:
         t2.add_column("Model Name", style="bold white", width=25)
         t2.add_column("Host Latency", justify="right", width=12)
         t2.add_column("Host FPS", justify="right", width=9)
-        t2.add_column("RV1109 NPU", justify="center", width=12)
+        t2.add_column("C300 Ingenic", justify="center", width=12)
         t2.add_column("Flash ROM", justify="center", width=12)
 
         for r in results:
@@ -698,13 +699,13 @@ def export_markdown_report(results: List[ModelEvaluationResult], report_path: Pa
 > **Key Finding**: 
 > - **Critical Defect**: `ssd_mobilenet_v2_int8.tflite` is **counterfeit** (100% FP32 weights, 0 INT8 operations, byte-for-byte replica of `ssd_mobilenet_v2_fp32.tflite`).
 > - **Resolution Mismatch**: SSD MobileNetV2 uses `256x256` inputs instead of the `300x300` resolution specified in the preliminary project pipeline.
-> - **Hardware Constraints**: All FP32 models (> 11 MB) violate the SPI Flash ROM budget of target embedded cameras (Rockchip RV1109 / Ingenic T31 with 16-32MB total Flash) and cannot be accelerated by integer NPUs (1.2 TOPS INT8).
+> - **Hardware Constraints**: All FP32 models (> 11 MB) violate the SPI Flash ROM budget of target camera Xiaomi Smart Camera C300 (Ingenic T31N with 16MB Flash) and cannot be accelerated on the SIMD128 vector engine.
 
 ---
 
 ## 2. Model Zoo Evaluation Matrix
 
-| Model Filename | Architecture | Resolution & Layout | Arithmetic Type | Size (MB) | Host Latency (ms) | Host FPS | RV1109 NPU Support | Flash ROM Fit | Overall Status |
+| Model Filename | Architecture | Resolution & Layout | Arithmetic Type | Size (MB) | Host Latency (ms) | Host FPS | Ingenic T31N Fit | Flash ROM Fit | Overall Status |
 |:---|:---|:---:|:---:|---:|---:|---:|:---:|:---:|:---:|
 """
 
@@ -721,7 +722,7 @@ def export_markdown_report(results: List[ModelEvaluationResult], report_path: Pa
 
 ## 3. Hardware Suitability & Deployment Comparison
 
-### 3.1. Embedded Smart Camera Profile (Rockchip RV1109 / Ingenic T31)
+### 3.1. Embedded Smart Camera Profile: Xiaomi Smart Camera C300 (Ingenic T31N)
 - **Processor**: Dual-core ARM Cortex-A7 @ 1.5 GHz.
 - **NPU**: 1.2 TOPS (strictly requires INT8 / INT16 integer weights and operations).
 - **Storage Constraints**: 16 MB – 32 MB SPI NAND/NOR Flash ROM.

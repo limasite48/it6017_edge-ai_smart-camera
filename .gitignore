@@ -66,11 +66,17 @@ app/build/
 *.ap_
 *.dex
 
-# Graphify Internal Working Caches (keep final reports, ignore runtime sidecars)
-graphify-out/.graphify_*
-graphify-out/.needs_update
-graphify-out/cache/
-graphify-out/20*/
+# Internal Development Documentation & Handouts (Internal Only)
+_antigravity/
+
+# Full Internal Empirical Evaluation Dumps & Raw Telemetry (Internal Only)
+reports/
+
+# Development-Only Artifact Scripts
+scripts/dev_tools/
+
+# Graphify Internal Working Caches & Knowledge Graph
+graphify-out/
 
 # External Mobile Platform Tools & Binaries
 tools/
