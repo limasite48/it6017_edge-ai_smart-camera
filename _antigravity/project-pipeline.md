@@ -97,35 +97,75 @@
       * Adreno 730 OpenCL GPU: Consistent ~11.2ms to 13.0ms execution across all INT8 and FP32 architectures (77 to 89 FPS).
       * Memory & Embedded Camera Viability: All INT8 models consume <= 29.2 MB peak RAM, comfortably within the 128 MB RAM ceiling of target Rockchip RV1109 / Ingenic T31 cameras.
     - Reports generated: `reports/smartphone_benchmark_report.md` and `reports/smartphone_benchmark_report.json`.
-# Phase 3: Real-world performance testing on smartphones (Latency, FPS, RAM, Power) [PLANNED]
-3.1/ Sustained Load & DVFS Thermal Throttling Profiling
-    - Continuous multi-minute execution (180s per test configuration) on the 3 deployment-viable INT8 models (`yolov8n_320_int8`, `efficientdet_lite0_int8`, `ssd_mobilenet_v2_int8`) plus `yolov8n_320_fp32` as reference.
-    - 1 Hz live telemetry polling across 8 CPU cores:
-      * Little Cluster (4x Cortex-A510): `/sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq`
-      * Mid Cluster (3x Cortex-A710): `/sys/devices/system/cpu/cpu4/cpufreq/scaling_cur_freq`
-      * Prime Core (1x Cortex-X2): `/sys/devices/system/cpu/cpu7/cpufreq/scaling_cur_freq`
-      * Thermal monitoring: SoC thermal zones (`/sys/class/thermal/thermal_zone0/temp`) and battery temperature.
-    - Quantify thermal degradation penalty: initial cold latency vs thermally saturated steady-state latency.
-    - 60-second recovery cool-down between test suites.
-    - Script: `scripts/run_smartphone_stress_test.py`.
+# Phase 3: Real-world performance testing on smartphones (Latency, FPS, RAM, Power) [COMPLETED]
+3.1/ Sustained Load & DVFS Thermal Throttling Profiling [COMPLETED]
+    - Multi-slice continuous execution across 16 configurations (3 INT8 models + 1 FP32 reference x 4 delegates) with automated 42°C thermal guard.
+    - 1 Hz live telemetry polling across 8 CPU cores (Little Cortex-A510, Mid Cortex-A710, Prime Cortex-X2) and SoC thermal sensors.
+    - Key findings:
+      * SSD MobileNetV2 INT8 on Hexagon NPU: 2.06 ms steady-state (484.3 FPS) with +0.3% thermal throttling (K_throttle), demonstrating near-zero thermal degradation.
+      * Single-core CPU (simulating embedded Cortex-A7): 18.27 ms steady-state (54.8 FPS) with +0.3% K_throttle, zero thermal throttling due to low core power.
+      * Multi-core CPU (4T): Exhibits +31.7% to +44.9% throttling under 100% continuous utilization as Cortex-A710 scales down frequencies.
+    - Script: scripts/run_smartphone_stress_test.py.
+    - Reports: reports/smartphone_stress_thermal_report.md and reports/smartphone_stress_thermal_telemetry.json.
 
-3.2/ Power & Energy Consumption Profiling
-    - Battery discharge tracking via `dumpsys battery` (voltage $V$ in mV, capacity delta) and `dumpsys batterystats` discharge rates ($\text{mAh} / \text{hr}$).
-    - Compute effective system power draw ($P = V \times I_{\text{avg}}$ in Watts) and energy efficiency ($E = P / \text{FPS}$ in mJ per frame / inference).
-    - Measure empirical energy reduction of INT8 quantization versus FP32 across architectures.
-    - Contrast mobile power profiles against Rockchip RV1109 / Ingenic T31 5W system power envelopes.
-    - Script: `scripts/run_smartphone_power_profile.py`.
+3.2/ Power & Energy Consumption Profiling [COMPLETED]
+    - Simulated battery discharge profiling via dumpsys battery unplug with automated battery reset guarantee.
+    - Idle baseline measured at 0.864 W (220.0 mA @ 3.93 V).
+    - Active power draw, net dynamic AI power, and energy efficiency (E_frame):
+      * SSD MobileNetV2 INT8 on Hexagon NPU: 1.53 mJ/frame at 1.61 W active power (93% duty-cycle capacity within 5W budget).
+      * YOLOv8n INT8 on CPU 1T (Embedded proxy): 5.88 mJ/frame at 1.19 W active power (100% duty-cycle capacity).
+      * INT8 vs FP32 energy comparison: INT8 reduces inference energy by up to 7x compared to GPU/NPU FP32 baselines (e.g. 5.88 mJ vs 41.7 mJ).
+    - Script: scripts/run_smartphone_power_profile.py.
+    - Reports: reports/smartphone_power_energy_report.md and reports/smartphone_power_energy_telemetry.json.
 
-3.3/ End-to-End Pipeline Latency Breakdown
-    - Measure complete edge processing pipeline on smartphone:
-      $\text{Total Latency} = T_{\text{preprocess}} (\text{letterbox padding/scaling}) + T_{\text{inference}} + T_{\text{postprocess}} (\text{multi-class NMS/box unpadding})$.
-    - Quantify pre/post-processing bottlenecks on mobile CPU versus accelerated model inference.
+3.3/ End-to-End Pipeline Latency Breakdown & Amdahl's Law Bottleneck [COMPLETED]
+    - Evaluated complete edge camera pipeline (T_total = T_preprocess + T_inference + T_postprocess) over real surveillance video feeds (one-by-one-person-detection.mp4).
+    - Aspect-ratio preserving letterbox preprocessing (114 gray fill) + on-device inference + multi-class NMS postprocessing.
+    - Quantified Amdahl's Law bottleneck:
+      * When inference is accelerated down to 2.52 ms on Hexagon NPU, CPU preprocessing (0.2 ms) and NMS postprocessing (2.5 ms) account for 52.3% of total pipeline latency.
+      * Explains why commercial smart cameras (Rockchip RV1109 / Ingenic T31) integrate dedicated Hardware ISPs and DMA image resizers to avoid CPU data movement bottlenecks.
+    - Script: scripts/eval_smartphone_pipeline.py.
+    - Reports: reports/smartphone_pipeline_report.md and reports/smartphone_pipeline_telemetry.json.
 
-3.4/ Phase 3 Documentation & Comparative Synthesis
-    - Generate comprehensive markdown and JSON reports:
-      * `reports/smartphone_stress_thermal_report.md`
-      * `reports/smartphone_power_energy_report.md`
-      * `reports/smartphone_phase3_telemetry.json`
-# Phase 4: Accuracy Evaluation (mAP) and Testing Conversion to Embedded NPU on a Laptop
-# Phase 5: Mapping Data to Camera SoC (Rockchip RV1109 / Ingenic T31) and Data Visualization
-# Phase 6: Expansion to a fire detection model (provisionally set aside; to be implemented once the project has stabilized)
+3.4/ Generalized Hardware Taxonomy Mapping & Scaling Model [COMPLETED]
+    - Formalized a 3-tier camera hardware proxy taxonomy (Tier 1 Entry IoT –, Tier 2 Mainstream Consumer –, Tier 3 Enterprise –+).
+    - Formulated the mathematical proxy scaling equation to project testbed measurements onto any target camera SoC.
+
+3.5/ Live Smartphone Camera Demo & Hardware Feasibility Capture [COMPLETED - PHYSICAL CAPSTONE]
+    - Deployed native mobile object detection application (YOLOv8 Mobile, package com.xvesa.yolov8mobile) to Xiaomi 12S Pro.
+    - Conducted physical on-device live camera test run with real-time CameraX viewfinder.
+    - Achieved 42.08 FPS real-time camera throughput on mobile CPU (~23.76 ms total pipeline latency per frame).
+    - Validated high-confidence object detection: laptop 90.1%, bottle 83.0% under indoor cluttered conditions.
+    - Empirical measurement correlates to within 99.8% of theoretical Phase 3 pipeline formulation (23.72 ms vs 23.76 ms).
+    - Screenshot: reports/live_camera_demo/yolo_v8_mobile_211026_1044.jpg.
+    - Automation Script: scripts/capture_live_demo.py.
+    - Deliverable Report: reports/live_camera_demo/live_camera_demo_report.md.
+
+# Phase 4: Accuracy Evaluation (mAP), Visual Model Comparison, and Embedded NPU Simulation [ACTIVE]
+4.1/ Quantitative Detection Accuracy Evaluation (mAP50 & mAP50-95)
+    - Evaluate Mean Average Precision across all 6 models on standardized benchmark dataset (COCO-val2017 subset).
+    - Quantify accuracy trade-offs: FP32 baseline vs INT8 quantized precision loss (Delta mAP).
+    - Script: scripts/eval_accuracy_map.py.
+    - Report: reports/model_accuracy_map_report.md.
+
+4.2/ Visual Multi-Model Comparison Grids & Synchronized Video Export [COMPLETED]
+    - Generate synchronized side-by-side visual detection grids across all 6 models on key surveillance scenes (single person, crowded walking, occlusions).
+    - Render detection bounding boxes, confidence scores, and embedded Mobile Hardware Telemetry Badges (latency, FPS, power, mJ).
+    - Export composite high-resolution PNG grids and a synchronized multi-model comparison MP4 video.
+    - Script: scripts/generate_visual_comparison.py.
+    - Report: reports/visual_comparisons/visual_comparison_report.md.
+
+4.3/ Embedded NPU Toolchain Conversion & Simulation (Rockchip RKNN-Toolkit2)
+    - Run RKNN-Toolkit2 export and simulation targeting Rockchip RV1109 / RV1126 on workstation.
+    - Quantize models to RKNN format (.rknn), audit operator compatibility, and extract simulated NPU cycle counts.
+    - Script: scripts/simulate_rknn_conversion.py.
+    - Report: reports/rknn_embedded_npu_simulation_report.md.
+
+# Phase 5: Mapping Data to Camera SoC (Rockchip RV1109 / Ingenic T31) and Data Visualization [PLANNED]
+5.1/ Comprehensive Hardware Mapping & Scaling Projection
+    - Apply mathematical proxy scaling formula to project Xiaomi 12S Pro empirical data onto Rockchip RV1109 and Ingenic T31.
+    - Synthesize multi-dimensional trade-off matrix: Latency vs. Accuracy (mAP) vs. Power (W) vs. RAM (MB) vs. BOM Cost ($).
+5.2/ Publication-Quality Data Visualizations
+    - Generate charts (Pareto frontiers, radar plots, thermal degradation curves, power breakdowns) for final report and presentation slides.
+
+# Phase 6: Expansion to a Fire Detection Model (Provisionally set aside; to be implemented once the project has stabilized)

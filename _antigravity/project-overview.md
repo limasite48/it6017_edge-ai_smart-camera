@@ -13,6 +13,9 @@ For the "Research and Reverse Engineer" type of project, teams are required to d
     - Evaluate and compare the options: performance, accuracy, energy consumption, cost, etc.
     - Write a detailed report + Presentation
 
+**Teacher Notes**
+The project must strictly adhere to the requirements for surveying a specific, real-world system and must demonstrate the feasibility of reverse engineering it.
+
 /////////////////////////////////
 
 **Anticipated components within the project**
@@ -48,8 +51,8 @@ For the "Research and Reverse Engineer" type of project, teams are required to d
     - Operating System: Android 13 (HyperOS / MIUI 14).
  
 `Hardware for comparison: common consumer-grade cameras such as the Xiaomi Smart Camera C300/C400, Wyze Cam v3, etc. (only study, don't have actual device)`
-    - SoC: Rockchip RV1109 (dual-core ARM Cortex-A7 @ 1.5 GHz) or Ingenic T31.
-    - AI Accelerator (NPU): 1.2 TOPS (supports INT8/INT16 integer arithmetic).
+    - SoC: Ingenic T31.
+    - AI Accelerator (NPU): 0.5 TOPS
     - Memory: 128 MB DDR3 RAM (shared across the OS, H.264/H.265 video decoding streams, and AI models); 16–32 MB SPI NAND/NOR Flash ROM.
     - Image Sensor: 3MP/2K CMOS sensor (OmniVision OS04B10 / GalaxyCore) with a MIPI-CSI interface.
     - Power & Thermal Management: DC 5V/1A (approx. 5W power consumption); fully passive cooling (fanless) within a sealed plastic enclosure.
