@@ -40,7 +40,7 @@ console = Console()
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 MODELS_DIR = PROJECT_ROOT / "models"
 REPORTS_DIR = PROJECT_ROOT / "reports"
-DATASETS_DIR = PROJECT_ROOT.parent / "datasets" / "coco128"
+DATASETS_DIR = (PROJECT_ROOT / "datasets" / "coco128") if (PROJECT_ROOT / "datasets" / "coco128").exists() else (PROJECT_ROOT.parent / "datasets" / "coco128")
 IMAGES_DIR = DATASETS_DIR / "images" / "train2017"
 LABELS_DIR = DATASETS_DIR / "labels" / "train2017"
 

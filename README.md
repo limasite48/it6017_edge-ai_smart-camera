@@ -67,6 +67,9 @@ The project environment is fully self-contained using standard Python tooling.
 
 ### Automated Benchmark Suite Commands:
 ```powershell
+# 0. Download Evaluation Datasets & Verify Models
+.\.venv\Scripts\python.exe scripts/download_assets.py --all
+
 # 1. Verify Model Zoo Integrity & Physical Gating (Phase 1)
 .\.venv\Scripts\python.exe scripts/eval-model.py --strict
 
@@ -109,6 +112,12 @@ All presentation charts, Excel workbooks, and editable Draw.io diagrams are arch
 
 - **Master Executive Summary**: [`docs/PROJECT_OVERVIEW_SUMMARY.md`](docs/PROJECT_OVERVIEW_SUMMARY.md)  
   *Holistic technical overview answering the 4 core course defense questions with supporting data.*
+- **Defense Clarification & Q&A Dossier**: [`docs/project-clarify.md`](docs/project-clarify.md)  
+  *Deep dive Q&A addressing testbed settings, cycle-scaling equations, mAP derivations, and Amdahl's Law.*
+- **Reverse Engineering Technical Evidence**: [`docs/xiaomi_c300_reverse_engineering_dossier.md`](docs/xiaomi_c300_reverse_engineering_dossier.md)  
+  *Authoritative dossier detailing Ingenic T31 datasheets, firmware symbols, and C301/C300 prototype teardown analysis.*
+- **Empirical Prototype Teardown Photographs**: [`hardware-spec/`](hardware-spec/) (`1.jpg`–`5.jpg`)  
+  *High-resolution teardown photographs of the physical camera motherboard (`C301-MAIN-01B-2`), SmartSens SC3336 sensor board, and UART debugging test pads.*
 - **Editable Draw.io Multi-Page Diagram Suite**: [`docs/figures/c300_edge_ai_architectural_diagrams.drawio`](docs/figures/c300_edge_ai_architectural_diagrams.drawio)  
   *Open in [app.diagrams.net](https://app.diagrams.net) or VS Code to freely edit labels, move badges, or translate text:*
   * Page 1: Accuracy vs. Latency Pareto Frontier & Real-Time Gating Line
@@ -133,8 +142,12 @@ All presentation charts, Excel workbooks, and editable Draw.io diagrams are arch
 ```
 .
 ├── README.md                                <- Top-level repository overview and quickstart guide
+├── datasets/                                <- Standardized evaluation datasets (coco128, coco8) [Ignored in Git]
+├── hardware-spec/                           <- Physical prototype teardown photos (1.jpg to 5.jpg)
 ├── docs/                                    <- Public-facing documentation, data tables & figures
 │   ├── PROJECT_OVERVIEW_SUMMARY.md          <- Master project overview addressing instructor questions
+│   ├── project-clarify.md                   <- Comprehensive defense Q&A, equations & dataset matrices
+│   ├── xiaomi_c300_reverse_engineering_dossier.md <- Technical reverse engineering evidentiary dossier
 │   ├── data/                                <- Excel workbook (.xlsx) and CSV benchmark matrices
 │   │   ├── model_benchmark_data.xlsx        <- Formatted multi-sheet workbook
 │   │   ├── model_benchmark_matrix.csv       <- Tabular model benchmarks
@@ -144,6 +157,7 @@ All presentation charts, Excel workbooks, and editable Draw.io diagrams are arch
 │       └── *.png / *.svg                    <- High-resolution presentation graphics
 ├── models/                                  <- Standardized 3x2 evaluation model zoo (FP32 & INT8 .tflite)
 ├── scripts/                                 <- Core production benchmark, audit & charting scripts
+│   ├── download_assets.py                   <- Automated downloader for COCO datasets and assets
 │   ├── eval-model.py                        <- Model zoo integrity validator
 │   ├── eval_accuracy_map.py                 <- COCO-128 mAP evaluation engine
 │   ├── audit_c300_embedded_feasibility.py   <- Ingenic T31N memory/flash gating auditor
@@ -151,7 +165,8 @@ All presentation charts, Excel workbooks, and editable Draw.io diagrams are arch
 │   ├── generate_drawio_diagrams.py          <- Draw.io XML and CSV data generator
 │   ├── generate_publication_charts.py       <- Matplotlib scientific figure generator
 │   ├── eval_smartphone_pipeline.py          <- End-to-end latency & Amdahl's Law benchmark
-│   └── run_smartphone_benchmark.py          <- 24-configuration mobile testbed orchestrator
+│   ├── run_smartphone_benchmark.py          <- 24-configuration mobile testbed orchestrator
+│   └── dev_tools/                           <- Internal experimental scripts and profiling utilities
 └── data/                                    <- Standardized video & snapshot test datasets
 ```
 
@@ -161,6 +176,5 @@ All presentation charts, Excel workbooks, and editable Draw.io diagrams are arch
 
 - **Comprehensive Master Summary**: All teams and instructors should consult [`docs/PROJECT_OVERVIEW_SUMMARY.md`](docs/PROJECT_OVERVIEW_SUMMARY.md) for the complete synthesis of requirements, methodologies, empirical datasets, and practical answers.
 - **For Sub-Team 1 (System Survey & Market Context)**: See Section 1 & 3 of `docs/PROJECT_OVERVIEW_SUMMARY.md` for retail pricing, vendor cloud subscription limitations, and privacy benefits.
-- **For Sub-Team 2 (Hardware Teardown & PCB Analysis)**: See Section 1.2 & 3 of `docs/PROJECT_OVERVIEW_SUMMARY.md` for Ingenic T31N pinouts, memory budgets (`rmem=28M`), and Hardware ISP DMA scaler architecture.
-- **For Sub-Team 4 (Application & Cloud Integration)**: See Section 3 & 4 of `docs/PROJECT_OVERVIEW_SUMMARY.md` for MQTT JSON alert payloads, 35.6 ms latency thresholds, and Phase 6 Unified Fire/Smoke detection roadmap.
-- **For Sub-Team 4 (Application & Cloud Integration)**: See [`_antigravity/subteam3_handover_package.md`](_antigravity/subteam3_handover_package.md#4-plug-and-play-content-for-sub-team-4-application--cloud-integration) for MQTT JSON alert payloads, 35.6 ms latency thresholds, and PTZ tracking heuristics.
+- **For Sub-Team 2 (Hardware Teardown & PCB Analysis)**: See Section 1.2 & 3 of `docs/PROJECT_OVERVIEW_SUMMARY.md` and [`docs/xiaomi_c300_reverse_engineering_dossier.md`](docs/xiaomi_c300_reverse_engineering_dossier.md) for Ingenic T31N pinouts, memory budgets (`rmem=28M`), and Hardware ISP DMA scaler architecture.
+- **For Sub-Team 4 (Application & Cloud Integration)**: See Section 3 & 4 of `docs/PROJECT_OVERVIEW_SUMMARY.md` and [`_antigravity/subteam3_handover_package.md`](_antigravity/subteam3_handover_package.md) for MQTT JSON alert payloads, 35.6 ms latency thresholds, and PTZ tracking heuristics.

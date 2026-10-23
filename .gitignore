@@ -21,6 +21,8 @@ temp/
 
 # Datasets & Heavy Media Files
 # (Prevent pushing files exceeding GitHub 100MB limit, e.g., 4K test clips)
+datasets/*
+!datasets/.gitkeep
 data/**/*.mp4
 data/**/*.avi
 data/**/*.mov

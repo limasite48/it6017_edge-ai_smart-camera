@@ -17,7 +17,7 @@ This section cross-references all mandatory project constraints established by t
 
 | Requirement / Constraint | Technical Specification & Source of Truth | Verification Method | Status |
 |---|---|---|:---:|
-| **1. Real-World Target System** | Surveyed commercial smart camera: **Xiaomi Smart Camera C300 (Model: `XMC01` / SKU: `MJSXJ14CM`)**. Single-SoC design: **Ingenic T31N** (22nm, MIPS32r2 @ 1.5 GHz + SIMD128 vector engine). | Teardown photos, FCC/CE filings, and kernel bootlogs (`mem=36M@0x0 rmem=28M@0x2400000`). | ✅ **Verified** |
+| **1. Real-World Target System** | Surveyed commercial smart camera: **Xiaomi Smart Camera C300 (Model: `XMC01` / SKU: `MJSXJ14CM`)**. Single-SoC design: **Ingenic T31N** (22nm, MIPS32r2 @ 1.5 GHz + SIMD128 vector engine). | Physical prototype teardown photos (`hardware-spec/1.jpg`–`5.jpg`, `C301-MAIN-01B-2` board confirming Ingenic T31N SoC, 64 MB DDR2 SIP, 16 MB Flash, SC3336 sensor, and UART pads), FCC/CE filings, and kernel bootlogs (`mem=36M@0x0 rmem=28M@0x2400000`). | ✅ **Verified** |
 | **2. Zero External Components Mandate** | Strict elimination of external accelerators (e.g. separate NPUs or third-party SoCs like Rockchip RV1109/RV1126). All inferences must run on the existing factory silicon. | Audited Ingenic Magik SDK and MIPS32 SIMD128 instruction set compatibility. | ✅ **Verified** |
 | **3. Hardware Memory Ceiling** | **64 MB DDR2 SIP** total system RAM. Operating system and video framebuffers leave a strict **$\le 22.0\text{ MB}$ AI Tensor Arena headroom**. | Memory map profiling: Linux kernel (20 MB) + Video/VPU ring buffers (18.5 MB) + daemons (3.5 MB). | ✅ **Verified** |
 | **4. Flash Storage Partition Ceiling** | **16 MB SPI NOR Flash** (GD25Q128E). Dedicated SquashFS partition for AI model weights is **$\le 5.50\text{ MB}$** (critical limit: 6.00 MB). | Flash MTD partition layout audit via `scripts/audit_c300_embedded_feasibility.py`. | ✅ **Verified** |
@@ -150,7 +150,19 @@ A critical embedded bottleneck in video analytics is preprocessing latency:
 
 ## 4. Empirical Performance, Accuracy & Resource Data (Task 3.3)
 
-### 4.1 Quantitative Detection Accuracy Benchmarks (COCO-128)
+### 4.1 Dataset-to-Parameter Experimental Mapping Matrix
+
+To ensure full experimental reproducibility and methodological clarity, the table below maps each dataset and input source across the evaluation framework to the specific parameters measured, the corresponding test runner script, and the analytical purpose:
+
+| Experimental Domain | Dataset / Input Source | Specific Parameters Measured | Tool / Test Script | Primary Purpose in Evaluation |
+|---|---|---|---|---|
+| **Accuracy & Precision Evaluation** | **COCO-128 Validation Subset** (`datasets/coco128/` - 128 images, 254 `person` instances) | $\text{mAP}_{50}$, $\text{mAP}_{75}$, $\text{mAP}_{50-95}$, Precision, Recall, F1-Score | `scripts/eval_accuracy_map.py` | Quantify object detection quality across FP32 and INT8 quantization without bias. |
+| **Model Binary & Memory Audit** | **TFLite FlatBuffers** (`models/*.tflite`) | File size (Flash ROM footprint), Tensor Arena (Working RAM footprint), Operator count | `scripts/audit_c300_embedded_feasibility.py` | Verify strict compliance with 16 MB Flash (5.5 MB partition) and 64 MB RAM (22.0 MB AI headroom). |
+| **Throughput & Thermal Stability** | **Synthetic Uniform Tensors** (`[1, 320, 320, 3]` / ADB `benchmark_model`) | Inference latency (min, max, avg, std-dev), FPS, steady-state latency drift ($K_{\text{throttle}}$), CPU/SoC temperatures | `tools/bin/benchmark_model` & `scripts/run_smartphone_stress_test.py` | Isolate raw silicon compute throughput and verify thermal sustainability without I/O or decode jitter. |
+| **Subsystem Power Telemetry** | **Sustained Continuous Inference Loops** (100% compute duty cycle) | Total active power ($W$), Baseline idle power ($W$), Net AI compute power ($W$), Energy per frame ($mJ$) | `scripts/run_smartphone_power_profile.py` via Android `dumpsys battery` | Prove the AI engine consumes $\le 0.33\text{ W}$, well below the camera's 1.0W passive thermal ceiling. |
+| **End-to-End Pipeline Latency** | **Live Physical Camera Feed** (`CameraX` preview frames via `yolov8_mobile.apk`) | Camera capture latency, Preprocessing (letterbox/rescale), NMS postprocessing, End-to-end FPS | `scripts/eval_smartphone_pipeline.py` & Android live telemetry | Prove Amdahl's Law resolution via Ingenic Hardware ISP DMA downscaler. |
+
+### 4.2 Quantitative Detection Accuracy Benchmarks (COCO-128)
 
 Accuracy was evaluated on the standardized COCO-128 validation dataset (128 images, 80 object categories, 254 ground-truth `person` instances) under identical intersection-over-union (IoU) evaluation bounds:
 
@@ -165,22 +177,24 @@ Accuracy was evaluated on the standardized COCO-128 validation dataset (128 imag
 
 *(Extracted from empirical benchmark run `reports/model_accuracy_map_report.json`)*
 
-### 4.2 Testbed Measured vs. Target Projected Performance Matrix
+### 4.3 Testbed Measured vs. Target Projected Performance Matrix
 
 The table below correlates measured mobile testbed proxy data (CPU 1-Thread) with mathematically projected Ingenic T31N execution metrics:
 
-| Model Architecture | Precision | Mobile Proxy Latency (ms) | Projected T31N Latency (ms) | Projected T31N FPS | Real-Time Gating ($\ge 20\text{ FPS}$) | Net AI Power (W) | Energy / Frame ($mJ$) | Pareto Efficiency Score | Overall Feasibility Status |
+| Model Architecture | Precision | Mobile Proxy Latency (ms) | Projected T31N Latency (ms) | Projected T31N FPS | Real-Time Gating ($\ge 20\text{ FPS}$) | Net AI Power (W) | Projected T31N Energy ($mJ$) | Pareto Efficiency Score | Overall Feasibility Status |
 |---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---|
-| **YOLOv8n - Nano (INT8)** | `INT8` | **18.28** | **35.6** | **28.1** | ✅ **YES** | **0.322** | **11.4** | **`0.6088`** | **HIGHLY FEASIBLE (Optimal)** |
-| **EfficientDet-Lite0 (INT8)** | `INT8` | 27.14 | 53.3 | 18.8 | ❌ NO (1/2 Stride) | 0.132 | 7.0 | `0.1808` | **UNFEASIBLE (RAM OOM)** |
-| **SSD MobileNetV2 (INT8)** | `INT8` | 87.15 | 171.3 | 5.8 | ❌ NO (1/4 Stride) | 0.109 | 18.7 | `0.1777` | **FEASIBLE (Subsampled)** |
-| **YOLOv8n - Nano (FP32)** | `FP32` | 65.22 | 227.7 | 4.4 | ❌ NO (1/5 Stride) | 0.132 | 30.1 | `0.0384` | **UNFEASIBLE (ROM/RAM Over)** |
-| **SSD MobileNetV2 (FP32)** | `FP32` | 70.74 | 1120.0 | 0.9 | ❌ NO (1/23 Stride) | 0.125 | 140.0 | `0.0032` | **UNFEASIBLE (Flash Over)** |
-| **EfficientDet-Lite0 (FP32)** | `FP32` | 65.51 | 332.5 | 3.0 | ❌ NO (1/7 Stride) | 0.125 | 41.6 | `0.0029` | **UNFEASIBLE (Flash Over)** |
+| **YOLOv8n - Nano (INT8)** | `INT8` | **18.28** | **35.6** | **28.1** | ✅ **YES** | **0.322** | **`12.46`\*** | **`0.6088`** | **HIGHLY FEASIBLE (Optimal)** |
+| **EfficientDet-Lite0 (INT8)** | `INT8` | 27.14 | 53.3 | 18.8 | ❌ NO (1/2 Stride) | 0.132 | `18.65` | `0.1808` | **UNFEASIBLE (RAM OOM)** |
+| **SSD MobileNetV2 (INT8)** | `INT8` | 87.15 | 171.3 | 5.8 | ❌ NO (1/4 Stride) | 0.109 | `59.95` | `0.1777` | **FEASIBLE (Subsampled)** |
+| **YOLOv8n - Nano (FP32)** | `FP32` | 65.22 | 227.7 | 4.4 | ❌ NO (1/5 Stride) | 0.132 | `79.69` | `0.0384` | **UNFEASIBLE (ROM/RAM Over)** |
+| **SSD MobileNetV2 (FP32)** | `FP32` | 70.74 | 1120.0 | 0.9 | ❌ NO (1/23 Stride) | 0.125 | `392.00` | `0.0032` | **UNFEASIBLE (Flash Over)** |
+| **EfficientDet-Lite0 (FP32)** | `FP32` | 65.51 | 332.5 | 3.0 | ❌ NO (1/7 Stride) | 0.125 | `116.37` | `0.0029` | **UNFEASIBLE (Flash Over)** |
+
+> *\*Note on Energy Metrics: Projected T31N energy reflects silicon execution on the 1.5 GHz Ingenic MIPS core ($0.350\text{ W} \times 35.6\text{ ms} = 12.46\text{ mJ}$), strictly matching `reports/hardware_mapping_c300_report.json` and `docs/data/model_benchmark_matrix.csv`. On the physical smartphone testbed proxy, measured active frame energy is $0.322\text{ W} \times 18.28\text{ ms} = \mathbf{5.88\text{ mJ/frame}}$.*
 
 $$\text{Pareto Efficiency Formula}: \text{Score}_{\text{Pareto}} = \frac{\text{mAP}_{50} \times \text{FPS}}{\text{RAM}_{\text{MB}} \times \text{Flash}_{\text{MB}} \times \text{Power}_{\text{W}}}$$
 
-### 4.3 Physical Boundary Compliance Gating Analysis
+### 4.4 Physical Boundary Compliance Gating Analysis
 
 | Model Candidate | Flash Footprint | Flash Budget (5.5 MB) | Flash Margin | Working RAM | RAM Budget (22.0 MB) | RAM Margin | Gating Verdict |
 |---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
@@ -193,7 +207,7 @@ $$\text{Pareto Efficiency Formula}: \text{Score}_{\text{Pareto}} = \frac{\text{m
 
 *(Data compiled from `reports/hardware_mapping_c300_report.json` and `reports/c300_embedded_feasibility_report.json`)*
 
-### 4.4 Technical Analysis of Model Failures & Viability
+### 4.5 Technical Analysis of Model Failures & Viability
 
 1. **Why `yolov8n_320_int8` is the Optimal Candidate**:
    - The C2f (Cross-Stage Partial with 2 convolutions) backbone and decoupled detection head maintain bounded peak activation tensors (19.4 MB), allowing it to fit into DDR2 memory alongside video encoder buffers.
@@ -295,3 +309,48 @@ All supporting datasets, multi-sheet spreadsheets, vector diagrams, and producti
 | **Draw.io & Excel Generator** | [`scripts/generate_drawio_diagrams.py`](../scripts/generate_drawio_diagrams.py) | Python 3 | Generates multi-page Draw.io XML, multi-sheet Excel, and CSV tables. |
 | **Mobile Pipeline Benchmark** | [`scripts/eval_smartphone_pipeline.py`](../scripts/eval_smartphone_pipeline.py) | Python 3 | End-to-end pipeline latency and Amdahl's Law ISP downscaler evaluator. |
 | **Mobile Benchmark Runner** | [`scripts/run_smartphone_benchmark.py`](../scripts/run_smartphone_benchmark.py) | Python 3 (ADB) | Orchestrates 24 mobile testbed configurations with thermal safety guard. |
+| **Asset Download & Verification** | [`scripts/download_assets.py`](../scripts/download_assets.py) | Python 3 | Zero-dependency downloader for COCO datasets, test videos, and model auditing. |
+
+---
+
+## 8. External Assets, Model Zoo & Dataset Download Reference
+
+To comply with Git storage limits while guaranteeing 100% experimental reproducibility, large datasets and external binary assets are decoupled from Git version control and fetched on demand. The table below catalogs all public online download sources and installation targets:
+
+### 8.1 Machine Learning Datasets
+
+| Dataset | Local Path | Online Source / Official Download URL | Size / File Count | License & Origin |
+|---|---|---|:---:|---|
+| **COCO-128 Validation Subset** | `datasets/coco128/` | [`https://github.com/ultralytics/yolov5/releases/download/v1.0/coco128.zip`](https://github.com/ultralytics/yolov5/releases/download/v1.0/coco128.zip) (Mirror: `https://ultralytics.com/assets/coco128.zip`) | 6.8 MB (128 images, 254 person annotations) | CC BY 4.0 (Ultralytics / MS COCO) |
+| **COCO-8 Smoke Test** | `datasets/coco8/` | [`https://github.com/ultralytics/assets/releases/download/v0.0.0/coco8.zip`](https://github.com/ultralytics/assets/releases/download/v0.0.0/coco8.zip) | 0.7 MB (8 images) | CC BY 4.0 (Ultralytics) |
+| **Intel IoT Surveillance Videos** | `data/test_videos/*.mp4` | [`https://raw.githubusercontent.com/intel-iot-devkit/sample-videos/master/`](https://github.com/intel-iot-devkit/sample-videos) | ~14.5 MB (3 surveillance streams) | MIT / Open Source Sample Feeds |
+
+### 8.2 Standardized Model Zoo
+
+| Model Filename | Resolution | Precision | Originating Architecture / Source Repository | Direct Download / Generation Source |
+|---|:---:|:---:|---|---|
+| **`yolov8n_320_int8.tflite`** | 320×320 | Weight INT8 | Ultralytics YOLOv8n (Release v8.2.0) | Exported via `ultralytics`: `yolo export model=yolov8n.pt format=tflite imgsz=320 int8=True` |
+| **`yolov8n_320_fp32.tflite`** | 320×320 | FP32 | Ultralytics YOLOv8n (Release v8.2.0) | Exported via `ultralytics`: `yolo export model=yolov8n.pt format=tflite imgsz=320` |
+| **`ssd_mobilenet_v2_int8.tflite`** | 300×300 | Full INT8 | Google Coral Edge TPU Model Repository | [`Google Coral Repo`](https://raw.githubusercontent.com/google-coral/test_data/master/ssd_mobilenet_v2_coco_quant_postprocess.tflite) |
+| **`ssd_mobilenet_v2_fp32.tflite`** | 300×300 | FP32 | Google TensorFlow Object Detection Zoo | [`TensorFlow Model Archive`](http://download.tensorflow.org/models/object_detection/ssd_mobilenet_v2_quantized_300x300_coco_2019_01_03.tar.gz) |
+| **`efficientdet_lite0_int8.tflite`**| 320×320 | Full INT8 | Google MediaPipe Object Detection Zoo | [`MediaPipe Model Storage (INT8)`](https://storage.googleapis.com/mediapipe-models/object_detector/efficientdet_lite0/int8/latest/efficientdet_lite0.tflite) |
+| **`efficientdet_lite0_fp32.tflite`**| 320×320 | FP32 | Google MediaPipe Object Detection Zoo | [`MediaPipe Model Storage (FP32)`](https://storage.googleapis.com/mediapipe-models/object_detector/efficientdet_lite0/float32/latest/efficientdet_lite0.tflite) |
+
+### 8.3 Automated Asset Setup Command
+
+A dedicated zero-dependency script automates downloading, extracting, and verifying all assets:
+
+```powershell
+# 1. Download and extract COCO-128 dataset
+python scripts/download_assets.py --dataset coco128
+
+# 2. Download sample surveillance test videos
+python scripts/download_assets.py --videos
+
+# 3. Verify integrity of all 6 canonical TFLite models
+python scripts/download_assets.py --check-models
+
+# Or execute full automated asset preparation with one command:
+python scripts/download_assets.py --all
+```
+

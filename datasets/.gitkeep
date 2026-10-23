@@ -1,0 +1,3 @@
+# Preserve datasets directory structure in Git while ignoring large contents.
+# Download official datasets using:
+#   python scripts/download_assets.py --dataset coco128
